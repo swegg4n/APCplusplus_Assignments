@@ -25,6 +25,9 @@ class List
 		Node* next() { return static_cast<Node*>(_next); }
 		Node* prev() { return static_cast<Node*>(_prev); }
 
+		/// <summary>
+		/// Places <paramref name="newNode"/> in the list (before this link)
+		/// </summary>
 		void insert(Node* newNode)
 		{
 			newNode->_next = this;
@@ -101,18 +104,21 @@ class List
 			return &static_cast<Node*>(_ptr)->_data;
 		};
 
+		// ++it
 		ListIter& operator++()
 		{
 			_ptr = _ptr->_next;
 			return *this;
 		};
 
+		// --it
 		ListIter& operator--()
 		{
 			_ptr = _ptr->_prev;
 			return *this;
 		};
 
+		// it++
 		ListIter operator++(int)
 		{
 			auto temp = *this;
@@ -120,6 +126,7 @@ class List
 			return temp;
 		};
 
+		// it++
 		ListIter operator--(int)
 		{
 			auto temp = *this;
@@ -153,6 +160,7 @@ public:
 
 
 #pragma region Constructors and assignment
+
 	~List()
 	{
 		while (_head._next != end())
@@ -175,6 +183,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Constructor for testing. Generates a list with one character in each node
+	/// </summary>
 	List(const char* other)
 	{
 		const char* ptr = other;
@@ -238,6 +249,9 @@ public:
 #pragma region Capacity
 	bool empty() const noexcept { return begin() == end(); };
 
+	/// <summary>
+	/// Counts the number of elements in the list. O(n)
+	/// </summary>
 	size_t size() const noexcept
 	{
 		size_t count = 0;
@@ -249,6 +263,9 @@ public:
 
 #pragma region Modifiers
 
+	/// <summary>
+	/// Creates a new node at <paramref name="pos"/>
+	/// </summary>
 	iterator insert(iterator pos, const T& value)
 	{
 		Node* newNode = new Node(value);
@@ -259,6 +276,9 @@ public:
 		return iterator(newNode);
 	};
 
+	/// <summary>
+	/// Removes the link at position <paramref name="pos"/>
+	/// </summary>
 	iterator erase(const iterator& pos)
 	{
 		Link* next_it = pos._ptr->_next;
@@ -269,6 +289,9 @@ public:
 		return iterator(next_it);
 	}
 
+	/// <summary>
+	/// Adds the value <paramref name="value"/> to the end of the list
+	/// </summary>
 	void push_back(const T& value)
 	{
 		insert(end(), value);
@@ -276,6 +299,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Adds the value <paramref name="value"/> to the beginning of the list
+	/// </summary>
 	void push_front(const T& value)
 	{
 		insert(begin(), value);
@@ -283,6 +309,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Removes the link at the end of the list
+	/// </summary>
 	void pop_back()
 	{
 		erase(end()._ptr->_prev);
@@ -290,6 +319,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Removes the link at the beginning of the list
+	/// </summary>
 	void pop_front()
 	{
 		erase(begin()._ptr);
@@ -297,6 +329,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Swaps this list with <paramref name="rhs"/>
+	/// </summary>
 	void swap(List& rhs)
 	{
 		bool thisEmpty = this->empty();
@@ -334,6 +369,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Inserts all elements from <paramref name="other"/> (between <paramref name="first"/> and <paramref name="last"/>) at position <paramref name="pos"/>.  [<paramref name="first"/>, <paramref name="last"/>[
+	/// </summary>
 	void splice(const iterator pos, List& other, iterator first, iterator last)
 	{
 		const iterator insertPos = pos._ptr->_prev;
@@ -420,7 +458,9 @@ public:
 #pragma endregion
 
 
-
+	/// <summary>
+	/// Method for checking if the lists pointes point to the correct elements
+	/// </summary>
 	bool Invariant()
 	{
 		Link* temp(&_head);
