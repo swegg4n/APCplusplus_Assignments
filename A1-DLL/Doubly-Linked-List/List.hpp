@@ -461,9 +461,9 @@ public:
 	/// <summary>
 	/// Method for checking if the lists pointes point to the correct elements
 	/// </summary>
-	bool Invariant()
+	bool Invariant() const
 	{
-		Link* temp(&_head);
+		const Link* temp(&_head);
 
 		for (auto it = begin(); it != end(); ++it)
 		{
