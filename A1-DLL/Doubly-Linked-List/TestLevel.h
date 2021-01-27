@@ -2,7 +2,7 @@
 
 #define LEVEL 99
 #define VG
-#define Additional_Splice_Tests
+//#define Additional_Splice_Tests
 
 
 //Tanken är att man höjer Level successivt till 12

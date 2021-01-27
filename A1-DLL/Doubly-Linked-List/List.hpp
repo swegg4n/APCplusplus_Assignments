@@ -15,8 +15,8 @@ class List
 	class Link
 	{
 		friend class List<T>;
-		Link* _prev = &_head;
-		Link* _next = &_head;
+		Link* _prev;
+		Link* _next;
 
 		Link() : _prev(this), _next(this) {}
 
@@ -85,7 +85,7 @@ class List
 
 		ListIter(Link* p) : _ptr(static_cast<Node*>(p)) {}
 
-		ListIter& operator=(const ListIter& other)
+		ListIter& operator=(const ListIter& other) //can be =default
 		{
 			_ptr = other._ptr;
 			return *this;
@@ -165,7 +165,7 @@ public:
 	{
 		while (_head._next != end())
 		{
-			pop_front();
+			pop_front();	//unnecessary (only do delete)
 		}
 
 		CHECK;
@@ -200,7 +200,8 @@ public:
 
 	void operator=(const List& other)
 	{
-		List copy(other);
+		//Can be improved - Swap data between the first nodes, then append the remaining nodes
+		List copy(other);	
 		swap(copy);
 
 		CHECK;
@@ -424,7 +425,7 @@ public:
 			if (*lhs_it != *rhs_it)
 				return *lhs_it < *rhs_it;
 		}
-		return lhs.size() < rhs.size();
+		return lhs_it == lhs.end() && rhs_it != rhs.end();
 	};
 
 	friend bool operator>(const List& lhs, const List& rhs)
@@ -434,12 +435,12 @@ public:
 
 	friend bool operator<=(const List& lhs, const List& rhs)
 	{
-		return (lhs < rhs) || (lhs == rhs);
+		return !(lhs > rhs);
 	};
 
 	friend bool operator>=(const List& lhs, const List& rhs)
 	{
-		return (lhs > rhs) || (lhs == rhs);
+		return !(lhs < rhs);
 	};
 
 	friend std::ostream& operator<<(std::ostream& cout, const List& other)

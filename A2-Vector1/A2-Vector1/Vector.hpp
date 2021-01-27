@@ -9,15 +9,17 @@
 template<class T>
 class Vector
 {
+
+private:
+
 	T* _pointer;
 
 
 	template<class X>
 	class VectorItt
 	{
-		friend class Vector<T>;
 		T* _ptr;
-		
+
 	public:
 
 #pragma region typedef
@@ -32,15 +34,27 @@ class Vector
 
 
 #pragma region Constructors and assignment
-		~VectorItt();
+		~VectorItt() = default;
 
-		VectorItt();
+		VectorItt()
+		{
+			_ptr = nullptr;
+		};
 
-		VectorItt(const VectorItt& other);
+		VectorItt(const VectorItt& other)
+		{
+			_ptr = other._ptr;
+		};
 
-		VectorItt(T* p);
+		VectorItt(T* p)
+		{
+			_ptr = p;
+		};
 
-		VectorItt& operator=(const VectorItt& other);
+		VectorItt& operator=(const VectorItt& other)
+		{
+			_ptr = other._ptr;
+		};
 
 		const_iterator(iterator&);
 
@@ -48,41 +62,96 @@ class Vector
 #pragma endregion
 
 
-#pragma Non-members
-		T& operator*();
+#pragma region Non-members
+		T& operator*()
+		{
+			return *_ptr;
+		};
 
-		T* operator->();
+		T* operator->()
+		{
+			return _ptr;
+		};
 
-		T& operator[](size_t i);
-
-
-		VectorItt& operator++();
-
-		VectorItt& operator--();
-
-		VectorItt operator++(int);
-
-		VectorItt operator--(int);
-
-		VectorItt operator+(difference_type i) const;
-
-		VectorItt operator-(difference_type i) const;
-
-		difference_type operator-(const VectorItt& other) const;
+		T& operator[](size_t i)
+		{
+			return _ptr[i];
+		};
 
 
-		friend bool operator==(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt& operator++()
+		{
+			++_ptr;
+			return *this;
+		}
 
-		friend bool operator!=(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt& operator--()
+		{
+			--_ptr;
+			return *this;
+		}
 
-		friend bool operator<(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt operator++(int)
+		{
+			auto temp = *this;
+			operator++();
+			return temp;
+		}
 
-		friend bool operator>(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt operator--(int)
+		{
+			auto temp = *this;
+			operator--();
+			return temp;
+		}
 
-		friend bool operator<=(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt operator+(difference_type i) const
+		{
+			return _ptr + i;
+		}
 
-		friend bool operator>=(const VectorItt& lhs, const VectorItt& rhs);
+		VectorItt operator-(difference_type i) const
+		{
+			return _ptr - i;
+		}
+
+		difference_type operator-(const VectorItt& other) const
+		{
+			return _ptr - other._ptr;
+		}
+
+
+		friend bool operator==(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return lhs._ptr == rhs._ptr;
+		}
+
+		friend bool operator!=(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return lhs._ptr != rhs._ptr;
+		};
+
+		friend bool operator<(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return lhs._ptr < rhs._ptr;
+		};
+
+		friend bool operator>(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return lhs._ptr > rhs._ptr;
+		};
+
+		friend bool operator<=(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return !(lhs._ptr > rhs._ptr);
+		};
+
+		friend bool operator>=(const VectorItt& lhs, const VectorItt& rhs)
+		{
+			return !(lhs._ptr < rhs._ptr);
+		};
 #pragma endregion
+
 	};
 
 
@@ -91,21 +160,49 @@ public:
 #pragma region typedef
 	using iterator = VectorItt<T>;
 	using const_iterator = VectorItt<const T>;
+	using reverse_iterator = VectorItt<T>;
+	using const_reverse_iterator = VectorItt<const T>;
 	using size_type = std::size_t;
 #pragma endregion
 
 
 #pragma region Constructors and assignment
-	~Vector();
+	~Vector()
+	{
+		delete[] _pointer;
+	};
 
-	Vector() noexcept;
+	Vector() noexcept
+	{
+		_pointer = new T(8);
+	};
 
-	Vector(const Vector& other);
+	Vector(const Vector& other)
+	{
+		_pointer = new T(other.capacity());
 
-	Vector(Vector&& other) noexcept;
+		for (size_t i = 0; i < other.size(); i++)
+		{
+			_pointer[i] = other._pointer[i];
+		}
+	};
 
-	Vector(const char* other);
+	Vector(Vector&& other) noexcept
+	{
+		_pointer = other._pointer;
+		other._pointer = nullptr;
+	};
 
+	Vector(const char* other)
+	{
+		size_t otherSize = sizeof(other) / sizeof(char);
+		_pointer = new T(otherSize);
+
+		for (size_t i = 0; other[i] != '\0'; i++)
+		{
+			_pointer[i] = other[i];
+		}
+	};
 
 	Vector& operator=(const Vector& other);
 
@@ -114,37 +211,60 @@ public:
 
 
 #pragma region Element access
-	T& operator[](size_t i);
+	T& operator[](size_t i)
+	{
+		return _pointer[i];
+	};
 
-	T& at(size_t i);
+	T& at(size_t i)
+	{
+		if (i >= size())
+			throw std::out_of_range("");
+		else
+			return _pointer[i];
+	};
 
-	const& operator[](size_t i) const;
+	const& operator[](size_t i) const
+	{
+		return _pointer[i];
+	};
 
-	const T& at(size_t i) const;
+	const T& at(size_t i) const
+	{
+		if (i >= size())
+			throw std::out_of_range("");
+		else
+			return _pointer[i];
+	};
 
+	T* data() noexcept
+	{
+		return _pointer;
+	};
 
-	T* data() noexcept;
-
-	const T* data() const noexcept;
+	const T* data() const noexcept
+	{
+		return _pointer;
+	}:
 #pragma endregion
 
 
 #pragma region Iterators
 	iterator begin() noexcept;
-	const iterator begin() const noexcept;
-	const iterator cbegin() const noexcept;
+	const_iterator begin() const noexcept;
+	const_iterator cbegin() const noexcept;
 
 	iterator end() noexcept;
-	const iterator end() const noexcept;
-	const iterator cend() const noexcept;
+	const_iterator end() const noexcept;
+	const_iterator cend() const noexcept;
 
 	reverse_iterator begin() noexcept;
-	const reverse_iterator begin() const noexcept;
-	const reverse_iterator cbegin() const noexcept;
+	const_reverse_iterator begin() const noexcept;
+	const_reverse_iterator cbegin() const noexcept;
 
 	reverse_iterator end() noexcept;
-	const reverse_iterator end() const noexcept;
-	const reverse_iterator cend() const noexcept;
+	const_reverse_iterator end() const noexcept;
+	const_reverse_iterator cend() const noexcept;
 #pragma endregion
 
 
@@ -157,29 +277,61 @@ public:
 #pragma endregion
 
 
-#pragma Modifiers
+#pragma region Modifiers
 	void shrink_to_fit();
 
 	void push_back(T c);
 
 	void resize(size_t n);
-
 #pragma endregion
 
 
-#pragma Non-members
-	friend bool operator==(const Vector& lhs, const Vector& rhs);
+#pragma region Non-members
+	friend bool operator==(const Vector& lhs, const Vector& rhs)
+	{
+		auto lhs_it = lhs.begin();
+		auto rhs_it = rhs.begin();
 
-	friend bool operator!=(const Vector& lhs, const Vector& rhs);
+		for (; lhs_it != lhs.end() && rhs_it != rhs.end(); ++lhs_it, ++rhs_it)
+		{
+			if (*lhs_it != *rhs_it)
+				return false;
+		}
+		return lhs_it == lhs.end() && rhs_it == rhs.end();
+	};
 
-	friend bool operator<(const Vector& lhs, const Vector& rhs);
+	friend bool operator!=(const Vector& lhs, const Vector& rhs)
+	{
+		return !(lhs == rhs);
+	};
 
-	friend bool operator>(const Vector& lhs, const Vector& rhs);
+	friend bool operator<(const Vector& lhs, const Vector& rhs)
+	{
+		auto lhs_it = lhs.begin();
+		auto rhs_it = rhs.begin();
 
-	friend bool operator<=(const Vector& lhs, const Vector& rhs);
+		for (; lhs_it != lhs.end() && rhs_it != rhs.end(); ++lhs_it, ++rhs_it)
+		{
+			if (*lhs_it != *rhs_it)
+				return *lhs_it < *rhs_it;
+		}
+		return lhs.size() < rhs.size();
+	};
 
-	friend bool operator>=(const Vector& lhs, const Vector& rhs);
+	friend bool operator>(const Vector& lhs, const Vector& rhs)
+	{
+		return !(lhs < rhs) && (lhs != rhs);
+	};
 
+	friend bool operator<=(const Vector& lhs, const Vector& rhs)
+	{
+		return (lhs < rhs) || (lhs == rhs);
+	};
+
+	friend bool operator>=(const Vector& lhs, const Vector& rhs)
+	{
+		return (lhs > rhs) || (lhs == rhs);
+	};
 
 	friend std::ostream& operator<<(std::ostream& cout, const Vector& other)
 	{
@@ -188,7 +340,12 @@ public:
 		return cout;
 	}
 
-	void swap(Vector& lhs, Vector& rhs);
+	void swap(Vector& lhs, Vector& rhs)
+	{
+		Vector temp = lhs;
+		lhs = rhs;
+		rhs = temp;
+	}
 #pragma endregion
 
 
@@ -196,4 +353,5 @@ public:
 	{
 		return true;
 	}
+
 };
