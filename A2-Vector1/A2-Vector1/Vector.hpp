@@ -12,12 +12,13 @@ class Vector
 
 private:
 
-	T* _pointer;
+	T* _data;
 
 
 	template<class X>
 	class VectorItt
 	{
+		//friend class Vector<T>;
 		T* _ptr;
 
 	public:
@@ -56,9 +57,15 @@ private:
 			_ptr = other._ptr;
 		};
 
-		const_iterator(iterator&);
+		const_iterator(iterator&)
+		{
+			this = const_iterator(const_cast<T*>(_data));
+		}
 
-		const_iterator& operator=(iterator&);
+		const_iterator& operator=(iterator&)
+		{
+			this = const_iterator(const_cast<T*>(_data));
+		}
 #pragma endregion
 
 
@@ -169,38 +176,38 @@ public:
 #pragma region Constructors and assignment
 	~Vector()
 	{
-		delete[] _pointer;
+		delete[] _data;
 	};
 
 	Vector() noexcept
 	{
-		_pointer = new T(8);
+		_data = new T(8);
 	};
 
 	Vector(const Vector& other)
 	{
-		_pointer = new T(other.capacity());
+		_data = new T(other.capacity());
 
 		for (size_t i = 0; i < other.size(); i++)
 		{
-			_pointer[i] = other._pointer[i];
+			_data[i] = other._data[i];
 		}
 	};
 
 	Vector(Vector&& other) noexcept
 	{
-		_pointer = other._pointer;
-		other._pointer = nullptr;
+		_data = other._data;
+		other._data = nullptr;
 	};
 
 	Vector(const char* other)
 	{
 		size_t otherSize = sizeof(other) / sizeof(char);
-		_pointer = new T(otherSize);
+		_data = new T(otherSize);
 
 		for (size_t i = 0; other[i] != '\0'; i++)
 		{
-			_pointer[i] = other[i];
+			_data[i] = other[i];
 		}
 	};
 
@@ -213,7 +220,7 @@ public:
 #pragma region Element access
 	T& operator[](size_t i)
 	{
-		return _pointer[i];
+		return _data[i];
 	};
 
 	T& at(size_t i)
@@ -221,12 +228,12 @@ public:
 		if (i >= size())
 			throw std::out_of_range("");
 		else
-			return _pointer[i];
+			return _data[i];
 	};
 
 	const& operator[](size_t i) const
 	{
-		return _pointer[i];
+		return _data[i];
 	};
 
 	const T& at(size_t i) const
@@ -234,55 +241,102 @@ public:
 		if (i >= size())
 			throw std::out_of_range("");
 		else
-			return _pointer[i];
+			return _data[i];
 	};
 
 	T* data() noexcept
 	{
-		return _pointer;
+		return _data;
 	};
 
 	const T* data() const noexcept
 	{
-		return _pointer;
+		return _data;
 	}:
 #pragma endregion
 
 
 #pragma region Iterators
-	iterator begin() noexcept;
-	const_iterator begin() const noexcept;
-	const_iterator cbegin() const noexcept;
+	iterator begin() noexcept { return iterator(_data); }
+	const_iterator begin() const noexcept { return iterator(_data); }
+	const_iterator cbegin() const noexcept { return iterator(_data); }
 
-	iterator end() noexcept;
-	const_iterator end() const noexcept;
-	const_iterator cend() const noexcept;
+	iterator end() noexcept { return iterator(_data + size()); }
+	const_iterator end() const noexcept { return iterator(_data + size()); }
+	const_iterator cend() const noexcept { return iterator(_data + size()); }
 
-	reverse_iterator begin() noexcept;
-	const_reverse_iterator begin() const noexcept;
-	const_reverse_iterator cbegin() const noexcept;
+	reverse_iterator rbegin() noexcept { return end(); }
+	const_reverse_iterator rbegin() const noexcept { return end(); }
+	const_reverse_iterator rcbegin() const noexcept return cend();
 
-	reverse_iterator end() noexcept;
-	const_reverse_iterator end() const noexcept;
-	const_reverse_iterator cend() const noexcept;
+	reverse_iterator rend() noexcept { return begin(); }
+	const_reverse_iterator rend() const noexcept { return begin(); }
+	const_reverse_iterator rcend() const noexcept { return cbegin(); }
 #pragma endregion
 
 
-#pragma region Capacity
-	size_t size() noexcept;
+#pragma region Capacity & Modifiers
+	size_t size() noexcept
+	{
+		return end() - begin();
+	};
 
-	void reserve(size_t n);
+	void reserve(size_t n)
+	{
+		if (n >= capacity())
+		{
+			T* newData = new T[n];
+			for (size_t i = 0; i < size(); i++)
+			{
+				newData[i] = _data[i];
+			}
 
-	size_t capacity();
-#pragma endregion
+			delete[] _data;
+			_data = newData;
+		}
+	};
 
+	size_t capacity()
+	{
+		//return sizeof(_data) / sizeof(T);
+	};
 
-#pragma region Modifiers
-	void shrink_to_fit();
+	void shrink_to_fit()
+	{
+		if (capacity() > size())
+		{
+			T* newData = new T[size()];
+			for (size_t i = 0; i < size(); i++)
+			{
+				newData[i] = _data[i];
+			}
 
-	void push_back(T c);
+			delete[] _data;
+			_data = newData;
+		}
+	};
 
-	void resize(size_t n);
+	void push_back(T c)
+	{
+		if (size() == capacity())
+			reserve(capacity() * 2);
+
+		_pointer[size()] = c;
+	};
+
+	void resize(size_t n)
+	{
+		if (n > capacity())
+			reserve(n);
+
+		if (n > size())
+		{
+			for (size_t i = size(); i < n; i++)
+			{
+				_data[i] = T();
+			}
+		}
+	};
 #pragma endregion
 
 
@@ -315,7 +369,7 @@ public:
 			if (*lhs_it != *rhs_it)
 				return *lhs_it < *rhs_it;
 		}
-		return lhs.size() < rhs.size();
+		return lhs_it == lhs.end() && rhs_it != rhs.end();
 	};
 
 	friend bool operator>(const Vector& lhs, const Vector& rhs)
