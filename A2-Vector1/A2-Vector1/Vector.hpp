@@ -23,14 +23,12 @@ private:
 
 	public:
 
-#pragma region typedef
-		using value_type = T;
-		using difference_type = std::ptrdiff_t;
-		using reference = X&;
-		using const_reference = const X&;
-		using pointer = X*;
-		using const_pointer = const X*;
-		typedef const X* const_pointer;
+#pragma region typedefs
+		typedef T									value_type;
+		typedef std::ptrdiff_t						difference_type;
+		typedef T*									pointer;
+		typedef T&									reference;
+		typedef std::random_access_iterator_tag		iterator_category;
 #pragma endregion
 
 
@@ -55,17 +53,18 @@ private:
 		VectorItt& operator=(const VectorItt& other)
 		{
 			_ptr = other._ptr;
+			return *this;
 		};
 
-		const_iterator(iterator&)
-		{
-			this = const_iterator(const_cast<T*>(_data));
-		}
+		//const_iterator(iterator&)
+		//{
+		//	this = const_iterator(const_cast<T*>(_data));
+		//};
 
-		const_iterator& operator=(iterator&)
-		{
-			this = const_iterator(const_cast<T*>(_data));
-		}
+		//const_iterator& operator=(iterator&)
+		//{
+		//	this = const_iterator(const_cast<T*>(_data));
+		//};
 #pragma endregion
 
 
@@ -165,11 +164,11 @@ private:
 public:
 
 #pragma region typedef
-	using iterator = VectorItt<T>;
-	using const_iterator = VectorItt<const T>;
-	using reverse_iterator = VectorItt<T>;
-	using const_reverse_iterator = VectorItt<const T>;
-	using size_type = std::size_t;
+	typedef VectorItt<T>			iterator;
+	typedef VectorItt<const T>		const_iterator;
+	typedef VectorItt<T>			reverse_iterator;
+	typedef VectorItt<const T>		const_reverse_iterator;
+	typedef std::size_t				size_type;
 #pragma endregion
 
 
@@ -211,9 +210,15 @@ public:
 		}
 	};
 
-	Vector& operator=(const Vector& other);
+	Vector& operator=(const Vector& other)
+	{
 
-	Vector& operator=(Vector&& other) noexcept;
+	};
+
+	Vector& operator=(Vector&& other) noexcept
+	{
+
+	};
 #pragma endregion
 
 
@@ -231,7 +236,7 @@ public:
 			return _data[i];
 	};
 
-	const& operator[](size_t i) const
+	const T& operator[](size_t i) const
 	{
 		return _data[i];
 	};
@@ -252,7 +257,7 @@ public:
 	const T* data() const noexcept
 	{
 		return _data;
-	}:
+	};
 #pragma endregion
 
 
@@ -267,7 +272,7 @@ public:
 
 	reverse_iterator rbegin() noexcept { return end(); }
 	const_reverse_iterator rbegin() const noexcept { return end(); }
-	const_reverse_iterator rcbegin() const noexcept return cend();
+	const_reverse_iterator rcbegin() const noexcept { return cend(); }
 
 	reverse_iterator rend() noexcept { return begin(); }
 	const_reverse_iterator rend() const noexcept { return begin(); }
@@ -321,7 +326,7 @@ public:
 		if (size() == capacity())
 			reserve(capacity() * 2);
 
-		_pointer[size()] = c;
+		_data[size()] = c;
 	};
 
 	void resize(size_t n)
@@ -394,7 +399,7 @@ public:
 		return cout;
 	}
 
-	void swap(Vector& lhs, Vector& rhs)
+	friend void swap(Vector& lhs, Vector& rhs)
 	{
 		Vector temp = lhs;
 		lhs = rhs;
