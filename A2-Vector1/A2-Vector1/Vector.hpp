@@ -27,9 +27,7 @@ private:
 		typedef T value_type;
 		typedef std::ptrdiff_t difference_type;
 		typedef X& reference;
-		typedef const X& const_reference;
 		typedef X* pointer;
-		typedef const X* const_pointer;
 		typedef std::random_access_iterator_tag iterator_category;
 #pragma endregion
 
@@ -166,11 +164,11 @@ private:
 public:
 
 #pragma region typedef
-	typedef VectorItt<T>			iterator;
-	typedef VectorItt<const T>		const_iterator;
-	typedef VectorItt<T>			reverse_iterator;
-	typedef VectorItt<const T>		const_reverse_iterator;
-	typedef std::size_t				size_type;
+	typedef VectorItt<T>									iterator;
+	typedef VectorItt<const T>								const_iterator;
+	typedef std::reverse_iterator<VectorItt<T>>				reverse_iterator;
+	typedef std::reverse_iterator<VectorItt<const T>>		const_reverse_iterator;
+	typedef std::size_t										size_type;
 #pragma endregion
 
 
@@ -203,10 +201,10 @@ public:
 
 	Vector(const char* other)
 	{
-		size_t otherSize = sizeof(other) / sizeof(char);
+		size_t otherSize = std::strlen(other);
 		_data = new T(otherSize);
 
-		for (size_t i = 0; other[i] != '\0'; i++)
+		for (size_t i = 0; i < otherSize; i++)
 		{
 			_data[i] = other[i];
 		}
@@ -214,12 +212,17 @@ public:
 
 	Vector& operator=(const Vector& other)
 	{
-
+		//fill first n elements
+		Vector temp(other);
+		swap(temp);
+		return *this;
 	};
 
 	Vector& operator=(Vector&& other) noexcept
 	{
-
+		_data = other._data;
+		other._data = nullptr;
+		return *this;
 	};
 #pragma endregion
 
@@ -230,17 +233,17 @@ public:
 		return _data[i];
 	};
 
+	const T& operator[](size_t i) const
+	{
+		return _data[i];
+	};
+
 	T& at(size_t i)
 	{
 		if (i >= size())
 			throw std::out_of_range("");
 		else
 			return _data[i];
-	};
-
-	const T& operator[](size_t i) const
-	{
-		return _data[i];
 	};
 
 	const T& at(size_t i) const
@@ -265,20 +268,20 @@ public:
 
 #pragma region Iterators
 	iterator begin() noexcept { return iterator(_data); }
-	const_iterator begin() const noexcept { return iterator(_data); }
-	const_iterator cbegin() const noexcept { return iterator(_data); }
+	const_iterator begin() const noexcept { return const_iterator(_data); }
+	const_iterator cbegin() const noexcept { return const_iterator(_data); }
 
 	iterator end() noexcept { return iterator(_data + size()); }
-	const_iterator end() const noexcept { return iterator(_data + size()); }
-	const_iterator cend() const noexcept { return iterator(_data + size()); }
+	const_iterator end() const noexcept { return const_iterator(_data + size()); }
+	const_iterator cend() const noexcept { return const_iterator(_data + size()); }
 
-	reverse_iterator rbegin() noexcept { return end(); }
-	const_reverse_iterator rbegin() const noexcept { return end(); }
-	const_reverse_iterator rcbegin() const noexcept { return cend(); }
+	reverse_iterator rbegin() noexcept { return reverse_iterator(_data + size()); }
+	const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(_data + size()); }
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_data + size()); }
 
-	reverse_iterator rend() noexcept { return begin(); }
-	const_reverse_iterator rend() const noexcept { return begin(); }
-	const_reverse_iterator rcend() const noexcept { return cbegin(); }
+	reverse_iterator rend() noexcept { return reverse_iterator(_data); }
+	const_reverse_iterator rend() const noexcept { return const_reverse_iterator(_data); }
+	const_reverse_iterator crend() const noexcept { return const_reverse_iterator(_data); }
 #pragma endregion
 
 
@@ -381,17 +384,17 @@ public:
 
 	friend bool operator>(const Vector& lhs, const Vector& rhs)
 	{
-		return !(lhs < rhs) && (lhs != rhs);
+		return (rhs < lhs);
 	};
 
 	friend bool operator<=(const Vector& lhs, const Vector& rhs)
 	{
-		return (lhs < rhs) || (lhs == rhs);
+		return !(lhs > rhs);
 	};
 
 	friend bool operator>=(const Vector& lhs, const Vector& rhs)
 	{
-		return (lhs > rhs) || (lhs == rhs);
+		return !(lhs < rhs);
 	};
 
 	friend std::ostream& operator<<(std::ostream& cout, const Vector& other)
