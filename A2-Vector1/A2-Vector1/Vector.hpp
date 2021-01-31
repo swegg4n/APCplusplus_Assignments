@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cassert>
 #define CHECK assert(Invariant());
 
+#include <cassert>
 #include <iostream>
 
 
@@ -24,11 +24,14 @@ private:
 	public:
 
 #pragma region typedefs
-		typedef T value_type;
-		typedef std::ptrdiff_t difference_type;
-		typedef X& reference;
-		typedef X* pointer;
-		typedef std::random_access_iterator_tag iterator_category;
+		using value_type = T;
+		using difference_type = std::ptrdiff_t;
+		using reference = X&;
+		using pointer = X*;
+		using iterator_category = std::random_access_iterator_tag;
+
+		using iterator = VectorItt<T>;
+		using const_iterator = VectorItt<const T>;
 #pragma endregion
 
 
@@ -40,119 +43,113 @@ private:
 			_ptr = nullptr;
 		};
 
-		VectorItt(const VectorItt& other)
+		VectorItt(const VectorItt<X>& other)
 		{
 			_ptr = other._ptr;
 		};
 
 		VectorItt(T* p)
 		{
-			_ptr = p;
+			_ptr = static_cast<T*>(p);
 		};
 
-		VectorItt& operator=(const VectorItt& other)
+		VectorItt<X>& operator=(const VectorItt<X>& other) = default;
+
+		/*const_iterator(iterator&)
 		{
-			_ptr = other._ptr;
-			return *this;
-		};
-
-		//const_iterator(iterator&)
-		//{
-		//	this = const_iterator(const_cast<T*>(_data));
-		//};
+			this = const_iterator(const_cast<T*>(_data));
+		};*/
 
 		//const_iterator& operator=(iterator&)
 		//{
-		//	this = const_iterator(const_cast<T*>(_data));
+		//	//this = const_cast<const_iterator>(iterator(this));
 		//};
 #pragma endregion
 
 
 #pragma region Non-members
-		T& operator*()
+		X& operator*()
 		{
 			return *_ptr;
 		};
 
-		T* operator->()
+		X* operator->()
 		{
 			return _ptr;
 		};
 
-		T& operator[](size_t i)
+		X& operator[](size_t i)
 		{
 			return _ptr[i];
 		};
 
-
-		VectorItt& operator++()
+		VectorItt<X>& operator++()
 		{
 			++_ptr;
 			return *this;
 		}
 
-		VectorItt& operator--()
+		VectorItt<X>& operator--()
 		{
 			--_ptr;
 			return *this;
 		}
 
-		VectorItt operator++(int)
+		VectorItt<X> operator++(int)
 		{
 			auto temp = *this;
 			operator++();
 			return temp;
 		}
 
-		VectorItt operator--(int)
+		VectorItt<X> operator--(int)
 		{
 			auto temp = *this;
 			operator--();
 			return temp;
 		}
 
-		VectorItt operator+(difference_type i) const
+		VectorItt<X> operator+(difference_type i) const
 		{
 			return _ptr + i;
 		}
 
-		VectorItt operator-(difference_type i) const
+		VectorItt<X> operator-(difference_type i) const
 		{
 			return _ptr - i;
 		}
 
-		difference_type operator-(const VectorItt& other) const
+		difference_type operator-(const VectorItt<X>& other) const
 		{
 			return _ptr - other._ptr;
 		}
 
-
-		friend bool operator==(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator==(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return lhs._ptr == rhs._ptr;
 		}
 
-		friend bool operator!=(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator!=(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return lhs._ptr != rhs._ptr;
 		};
 
-		friend bool operator<(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator<(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return lhs._ptr < rhs._ptr;
 		};
 
-		friend bool operator>(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator>(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return lhs._ptr > rhs._ptr;
 		};
 
-		friend bool operator<=(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator<=(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return !(lhs._ptr > rhs._ptr);
 		};
 
-		friend bool operator>=(const VectorItt& lhs, const VectorItt& rhs)
+		friend bool operator>=(const VectorItt<X>& lhs, const VectorItt<X>& rhs)
 		{
 			return !(lhs._ptr < rhs._ptr);
 		};
@@ -164,11 +161,11 @@ private:
 public:
 
 #pragma region typedef
-	typedef VectorItt<T>									iterator;
-	typedef VectorItt<const T>								const_iterator;
-	typedef std::reverse_iterator<VectorItt<T>>				reverse_iterator;
-	typedef std::reverse_iterator<VectorItt<const T>>		const_reverse_iterator;
-	typedef std::size_t										size_type;
+	using iterator = VectorItt<T>;
+	using const_iterator = VectorItt<const T>;
+	using reverse_iterator = std::reverse_iterator<VectorItt<T>>;
+	using const_reverse_iterator = std::reverse_iterator<VectorItt<const T>>;
+	using size_type = std::size_t;
 #pragma endregion
 
 
@@ -180,12 +177,12 @@ public:
 
 	Vector() noexcept
 	{
-		_data = new T(8);
+		_data = new T[8];
 	};
 
 	Vector(const Vector& other)
 	{
-		_data = new T(other.capacity());
+		_data = new T[other.capacity()];
 
 		for (size_t i = 0; i < other.size(); i++)
 		{
@@ -201,8 +198,8 @@ public:
 
 	Vector(const char* other)
 	{
-		size_t otherSize = std::strlen(other);
-		_data = new T(otherSize);
+		size_t otherSize = std::strlen(other);	//TODO: check so that the empty char isn't counted!
+		_data = new T[otherSize];
 
 		for (size_t i = 0; i < otherSize; i++)
 		{
@@ -212,9 +209,8 @@ public:
 
 	Vector& operator=(const Vector& other)
 	{
-		//fill first n elements
 		Vector temp(other);
-		swap(temp);
+		swap(*this, temp);
 		return *this;
 	};
 
@@ -286,9 +282,15 @@ public:
 
 
 #pragma region Capacity & Modifiers
-	size_t size() noexcept
+	size_t size() const noexcept
 	{
 		return end() - begin();
+	};
+
+	size_t capacity() const noexcept
+	{
+		return 0;
+		//return sizeof(_data) / sizeof(T);
 	};
 
 	void reserve(size_t n)
@@ -304,11 +306,6 @@ public:
 			delete[] _data;
 			_data = newData;
 		}
-	};
-
-	size_t capacity()
-	{
-		//return sizeof(_data) / sizeof(T);
 	};
 
 	void shrink_to_fit()
