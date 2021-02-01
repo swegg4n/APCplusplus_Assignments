@@ -1,3 +1,5 @@
+#if defined temp
+
 #include "TestLevel.h"
 #include "Vector.hpp"
 
@@ -256,3 +258,4 @@ template struct CheckTypedefsConst<Vector<int>::const_iterator>;
 
 #pragma endregion Test of typedefs!
 
+#endif

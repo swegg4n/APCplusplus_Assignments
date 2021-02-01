@@ -13,6 +13,8 @@ class Vector
 private:
 
 	T* _data;
+	size_t _size;
+	size_t _capacity;
 
 
 	template<class X>
@@ -43,7 +45,7 @@ private:
 			_ptr = nullptr;
 		};
 
-		VectorItt(const VectorItt<X>& other)
+		VectorItt(const VectorItt& other)
 		{
 			_ptr = other._ptr;
 		};
@@ -53,7 +55,7 @@ private:
 			_ptr = static_cast<T*>(p);
 		};
 
-		VectorItt<X>& operator=(const VectorItt<X>& other) = default;
+		VectorItt& operator=(const VectorItt& other) = default;
 
 		/*const_iterator(iterator&)
 		{
@@ -83,38 +85,38 @@ private:
 			return _ptr[i];
 		};
 
-		VectorItt<X>& operator++()
+		VectorItt& operator++()
 		{
 			++_ptr;
 			return *this;
 		}
 
-		VectorItt<X>& operator--()
+		VectorItt& operator--()
 		{
 			--_ptr;
 			return *this;
 		}
 
-		VectorItt<X> operator++(int)
+		VectorItt operator++(int)
 		{
 			auto temp = *this;
 			operator++();
 			return temp;
 		}
 
-		VectorItt<X> operator--(int)
+		VectorItt operator--(int)
 		{
 			auto temp = *this;
 			operator--();
 			return temp;
 		}
 
-		VectorItt<X> operator+(difference_type i) const
+		VectorItt operator+(difference_type i) const
 		{
 			return _ptr + i;
 		}
 
-		VectorItt<X> operator-(difference_type i) const
+		VectorItt operator-(difference_type i) const
 		{
 			return _ptr - i;
 		}
@@ -177,14 +179,18 @@ public:
 
 	Vector() noexcept
 	{
-		_data = new T[8];
+		_size = 0;
+		_capacity = 4;
+		_data = new T[_capacity];
 	};
 
 	Vector(const Vector& other)
 	{
-		_data = new T[other.capacity()];
+		_capacity = other._capacity;
+		_size = other._size;
+		_data = new T[_capacity];
 
-		for (size_t i = 0; i < other.size(); i++)
+		for (size_t i = 0; i < other._size; i++)
 		{
 			_data[i] = other._data[i];
 		}
@@ -192,13 +198,21 @@ public:
 
 	Vector(Vector&& other) noexcept
 	{
+		_size = other._size;
+		_capacity = other._capacity;
 		_data = other._data;
+
+		other._size = 0;
+		other._capacity = 0;
 		other._data = nullptr;
 	};
 
 	Vector(const char* other)
 	{
-		size_t otherSize = std::strlen(other);	//TODO: check so that the empty char isn't counted!
+		size_t otherSize = std::strlen(other);
+
+		_size = otherSize;
+		_capacity = otherSize * 2;
 		_data = new T[otherSize];
 
 		for (size_t i = 0; i < otherSize; i++)
@@ -216,8 +230,14 @@ public:
 
 	Vector& operator=(Vector&& other) noexcept
 	{
+		_size = other._size;
+		_capacity = other._capacity;
 		_data = other._data;
+
+		other._size = 0;
+		other._capacity = 0;
 		other._data = nullptr;
+
 		return *this;
 	};
 #pragma endregion
@@ -236,7 +256,7 @@ public:
 
 	T& at(size_t i)
 	{
-		if (i >= size())
+		if (i >= _size)
 			throw std::out_of_range("");
 		else
 			return _data[i];
@@ -244,7 +264,7 @@ public:
 
 	const T& at(size_t i) const
 	{
-		if (i >= size())
+		if (i >= _size)
 			throw std::out_of_range("");
 		else
 			return _data[i];
@@ -267,13 +287,13 @@ public:
 	const_iterator begin() const noexcept { return const_iterator(_data); }
 	const_iterator cbegin() const noexcept { return const_iterator(_data); }
 
-	iterator end() noexcept { return iterator(_data + size()); }
-	const_iterator end() const noexcept { return const_iterator(_data + size()); }
-	const_iterator cend() const noexcept { return const_iterator(_data + size()); }
+	iterator end() noexcept { return iterator(_data + _size); }
+	const_iterator end() const noexcept { return const_iterator(_data + _size); }
+	const_iterator cend() const noexcept { return const_iterator(_data + _size); }
 
-	reverse_iterator rbegin() noexcept { return reverse_iterator(_data + size()); }
-	const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(_data + size()); }
-	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_data + size()); }
+	reverse_iterator rbegin() noexcept { return reverse_iterator(_data + _size); }
+	const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(_data + _size); }
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(_data + _size); }
 
 	reverse_iterator rend() noexcept { return reverse_iterator(_data); }
 	const_reverse_iterator rend() const noexcept { return const_reverse_iterator(_data); }
@@ -284,65 +304,67 @@ public:
 #pragma region Capacity & Modifiers
 	size_t size() const noexcept
 	{
-		return end() - begin();
+		return _size;
 	};
 
 	size_t capacity() const noexcept
 	{
-		return 0;
-		//return sizeof(_data) / sizeof(T);
+		return _capacity;
 	};
 
 	void reserve(size_t n)
 	{
-		if (n >= capacity())
+		if (n >= _capacity)
 		{
 			T* newData = new T[n];
-			for (size_t i = 0; i < size(); i++)
+			for (size_t i = 0; i < _size; i++)
 			{
 				newData[i] = _data[i];
 			}
 
 			delete[] _data;
+			_capacity = n;
 			_data = newData;
 		}
 	};
 
 	void shrink_to_fit()
 	{
-		if (capacity() > size())
+		if (_capacity > _size)
 		{
-			T* newData = new T[size()];
-			for (size_t i = 0; i < size(); i++)
+			T* newData = new T[_size];
+			for (size_t i = 0; i < _size; i++)
 			{
 				newData[i] = _data[i];
 			}
 
 			delete[] _data;
+			_capacity = _size;
 			_data = newData;
 		}
 	};
 
 	void push_back(T c)
 	{
-		if (size() == capacity())
-			reserve(capacity() * 2);
+		if (_size == _capacity)
+			reserve(_capacity * 2);
 
-		_data[size()] = c;
+		_data[_size++] = c;
 	};
 
 	void resize(size_t n)
 	{
-		if (n > capacity())
+		if (n > _capacity)
 			reserve(n);
 
-		if (n > size())
+		if (n > _size)
 		{
-			for (size_t i = size(); i < n; i++)
+			for (size_t i = _size; i < n; i++)
 			{
 				_data[i] = T();
 			}
 		}
+		_size = n;
 	};
 #pragma endregion
 

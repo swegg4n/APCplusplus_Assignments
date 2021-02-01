@@ -1,3 +1,5 @@
+#if defined temp
+
 #pragma once
 
 
@@ -10,3 +12,4 @@ void TestIterPart1();
 void TestIterInAlg();
 //void TestRevIterInAlg();
 
+#endif
