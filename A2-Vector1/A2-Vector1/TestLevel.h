@@ -1,9 +1,4 @@
+#pragma once
 
-//#define GBETYG  //Kommentera bort denna rad för VG test
-#ifdef GBETYG
-#undef VGBETYG
-#else
-#define VGBETYG
-#endif
-
-//#include "Dalloc.hpp"
+#define LEVEL 99
+#define VG

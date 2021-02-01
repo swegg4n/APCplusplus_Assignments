@@ -1,6 +1,7 @@
-#if defined temp
-
 #include "TestLevel.h"
+
+#if (defined(LEVEL)  && (LEVEL>20) ||  !defined(LEVEL))   && (defined(VG) || defined(G))
+
 #include "Vector.hpp"
 
 #include <iostream>
@@ -125,7 +126,6 @@ void TestIterForwardC() {
 //}
 
 void TestIterPart1() {
-
     //-	typdefs för iterator, const_iterator,  reverse_iterator och const_revers_iterator
     Vector<char>::iterator Str;
     //Vector<char>::reverse_iterator rStr;
@@ -176,18 +176,20 @@ void TestIterPart1() {
 #ifdef VG
     cout << "\nTestFörVälGodkänt Iter klar\n";
 #endif VG
-
 }
 
 #pragma region Test Iterator in Algorithm
-//namespace std {
+/*
+namespace std {
     template <class IT>
     void random_shuffle(IT begin, IT end) {
-        std::shuffle(begin, end, std::default_random_engine());
+        shuffle(begin, end, std::default_random_engine());
     }
-//}
+}
+*/
 
 void TestIterInAlg() {
+    /*
     static const int N = 26;
     Vector<char> v;
     v.reserve(N);
@@ -205,6 +207,7 @@ void TestIterInAlg() {
     std::sort(b, e);
 
     cout << v << endl;
+    */
 }
 
 //void TestRevIterInAlg() {
@@ -258,4 +261,7 @@ template struct CheckTypedefsConst<Vector<int>::const_iterator>;
 
 #pragma endregion Test of typedefs!
 
+#else
+void TestIterPart1() {}
+void TestIterInAlg() {}
 #endif

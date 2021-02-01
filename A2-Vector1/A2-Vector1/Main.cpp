@@ -16,8 +16,8 @@
 
 using std::cout;
 
-void TestVector();
 
+void TestVector();
 
 int main() {
 #ifdef DBG_NEW
@@ -25,12 +25,13 @@ int main() {
 #endif
     std::locale::global(std::locale("swedish"));
     TestVector();
-    //TestIterPart1();
-    ////TestIterForward();
-    //TestIterInAlg();
+    TestIterPart1();
+    TestIterInAlg();
 
-    //new int;
-    //cout << "det finns en minnesläcka i main, avsiktligt!\n så ni kan se att er minnesläckstest fungerar\n";
-    //std::cin.get();
+#if 0
+    new int;
+    cout << "det finns en minnesläcka i main, avsiktligt!\n så ni kan se att er minnesläckstest fungerar\n";
+#endif
+    std::cin.get();
 
 }

@@ -20,7 +20,6 @@ private:
 	template<class X>
 	class VectorItt
 	{
-		//friend class Vector<T>;
 		T* _ptr;
 
 	public:
@@ -32,8 +31,8 @@ private:
 		using pointer = X*;
 		using iterator_category = std::random_access_iterator_tag;
 
-		using iterator = VectorItt<T>;
-		using const_iterator = VectorItt<const T>;
+		//using iterator = VectorItt<T>;
+		//using const_iterator = VectorItt<const T>;
 #pragma endregion
 
 
@@ -70,17 +69,17 @@ private:
 
 
 #pragma region Non-members
-		X& operator*()
+		T& operator*()
 		{
 			return *_ptr;
 		};
 
-		X* operator->()
+		T* operator->()
 		{
 			return _ptr;
 		};
 
-		X& operator[](size_t i)
+		T& operator[](size_t i)
 		{
 			return _ptr[i];
 		};
@@ -182,6 +181,8 @@ public:
 		_size = 0;
 		_capacity = 4;
 		_data = new T[_capacity];
+
+		CHECK;
 	};
 
 	Vector(const Vector& other)
@@ -194,6 +195,8 @@ public:
 		{
 			_data[i] = other._data[i];
 		}
+
+		CHECK;
 	};
 
 	Vector(Vector&& other) noexcept
@@ -205,6 +208,8 @@ public:
 		other._size = 0;
 		other._capacity = 0;
 		other._data = nullptr;
+
+		CHECK;
 	};
 
 	Vector(const char* other)
@@ -213,23 +218,38 @@ public:
 
 		_size = otherSize;
 		_capacity = otherSize * 2;
-		_data = new T[otherSize];
+		_data = new T[_capacity];
 
 		for (size_t i = 0; i < otherSize; i++)
 		{
 			_data[i] = other[i];
 		}
+
+		CHECK;
 	};
 
 	Vector& operator=(const Vector& other)
 	{
-		Vector temp(other);
-		swap(*this, temp);
+		if (*this == other)
+			return *this;
+
+		reserve(other._size);
+		_size = other._size;
+
+		for (size_t i = 0; i < _size; i++)
+		{
+			_data[i] = other._data[i];
+		}
+
+		CHECK;
+
 		return *this;
 	};
 
 	Vector& operator=(Vector&& other) noexcept
 	{
+		delete[] _data;
+
 		_size = other._size;
 		_capacity = other._capacity;
 		_data = other._data;
@@ -237,6 +257,8 @@ public:
 		other._size = 0;
 		other._capacity = 0;
 		other._data = nullptr;
+
+		CHECK;
 
 		return *this;
 	};
@@ -314,7 +336,7 @@ public:
 
 	void reserve(size_t n)
 	{
-		if (n >= _capacity)
+		if (n > _capacity)
 		{
 			T* newData = new T[n];
 			for (size_t i = 0; i < _size; i++)
@@ -323,9 +345,11 @@ public:
 			}
 
 			delete[] _data;
-			_capacity = n;
 			_data = newData;
+			_capacity = n;
 		}
+
+		CHECK;
 	};
 
 	void shrink_to_fit()
@@ -342,6 +366,8 @@ public:
 			_capacity = _size;
 			_data = newData;
 		}
+
+		CHECK;
 	};
 
 	void push_back(T c)
@@ -350,6 +376,8 @@ public:
 			reserve(_capacity * 2);
 
 		_data[_size++] = c;
+
+		CHECK;
 	};
 
 	void resize(size_t n)
@@ -365,7 +393,18 @@ public:
 			}
 		}
 		_size = n;
+
+		CHECK;
 	};
+
+	void swap(Vector& other)
+	{
+		Vector temp(other);
+		other = *this;
+		*this = temp;
+
+		CHECK;
+	}
 #pragma endregion
 
 
@@ -425,16 +464,14 @@ public:
 
 	friend void swap(Vector& lhs, Vector& rhs)
 	{
-		Vector temp = lhs;
-		lhs = rhs;
-		rhs = temp;
+		lhs.swap(rhs);
 	}
 #pragma endregion
 
 
 	bool Invariant() const
 	{
-		return true;
+		return (_data != nullptr) && (_size <= _capacity);
 	}
 
 };
