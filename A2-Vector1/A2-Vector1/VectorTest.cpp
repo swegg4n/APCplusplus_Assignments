@@ -24,7 +24,6 @@ using std::endl;
 void TestRolOp();
 void TestCapacity();
 
-
 template<class X>
 bool operator==(const Vector<X>& lhs, const char *  rhs) {
     return lhs == Vector<X>(rhs);
@@ -77,9 +76,7 @@ void TestVector() {
 
         //	-	operator =(Sträng sträng)
         v2 = "hej";
-        v2 = v3;
-        assert(v2 == v3);
-        //assert((v2 = v3) == v3);
+        assert((v2 = v3) == v3);
         assert((v2 = v2) == v3);	//self assignment
 
         //Ej samma buffert
@@ -102,7 +99,7 @@ void TestVector() {
         Vector<char> v1("foo"), v2("bar"), v3("hej");
         auto xxx = v1.data();
         v1 = v2;
-        assert(xxx == v1.data());
+        assert(xxx == vec1.data());
     }
 #endif
 
@@ -226,6 +223,7 @@ void TestVector() {
     TestCapacity();
 
     cout << "\nTestVector klar\n";
+
 }
 
 void TestPushBackReallocation() {
@@ -252,6 +250,7 @@ void TestPushBackReallocation() {
     assert(internalBuf != &vec[0]);
     assert(cap < vec.capacity());
     assert(i == vec.size());
+
 }
 
 template<class C>

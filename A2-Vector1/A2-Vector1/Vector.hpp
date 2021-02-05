@@ -30,9 +30,6 @@ private:
 		using reference = X&;
 		using pointer = X*;
 		using iterator_category = std::random_access_iterator_tag;
-
-		//using iterator = VectorItt<T>;
-		//using const_iterator = VectorItt<const T>;
 #pragma endregion
 
 
@@ -44,42 +41,48 @@ private:
 			_ptr = nullptr;
 		};
 
-		VectorItt(const VectorItt& other)
+		//VectorItt(const VectorItt& other)
+		//{
+		//	_ptr = other._ptr;
+		//};
+
+		VectorItt<X>(const VectorItt<T>& other)
 		{
 			_ptr = other._ptr;
-		};
+		}
 
 		VectorItt(T* p)
 		{
 			_ptr = static_cast<T*>(p);
 		};
 
-		VectorItt& operator=(const VectorItt& other) = default;
+		//VectorItt& operator=(const VectorItt& other) = default;
 
-		/*const_iterator(iterator&)
+		VectorItt<X>& operator=(const VectorItt<T>& other)
 		{
-			this = const_iterator(const_cast<T*>(_data));
-		};*/
-
-		//const_iterator& operator=(iterator&)
-		//{
-		//	//this = const_cast<const_iterator>(iterator(this));
-		//};
+			_ptr = other._ptr;
+			return *this;
+		};
 #pragma endregion
 
 
 #pragma region Non-members
-		T& operator*()
+		X& operator*()
 		{
 			return *_ptr;
 		};
 
-		T* operator->()
+		X& operator*() const
+		{
+			return *_ptr;
+		};
+
+		X* operator->()
 		{
 			return _ptr;
 		};
 
-		T& operator[](size_t i)
+		X& operator[](size_t i)
 		{
 			return _ptr[i];
 		};
@@ -118,6 +121,18 @@ private:
 		VectorItt operator-(difference_type i) const
 		{
 			return _ptr - i;
+		}
+
+		VectorItt operator+=(difference_type i)
+		{
+			_ptr = _ptr + i;
+			return _ptr;
+		}
+
+		VectorItt operator-=(difference_type i)
+		{
+			_ptr = _ptr - i;
+			return _ptr;
 		}
 
 		difference_type operator-(const VectorItt<X>& other) const
@@ -233,7 +248,7 @@ public:
 		if (*this == other)
 			return *this;
 
-		reserve(other._size);
+		reserve(other._size);	//Only reserves more space if needed!
 		_size = other._size;
 
 		for (size_t i = 0; i < _size; i++)

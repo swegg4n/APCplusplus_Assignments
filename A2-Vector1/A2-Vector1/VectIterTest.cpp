@@ -126,6 +126,7 @@ void TestIterForwardC() {
 //}
 
 void TestIterPart1() {
+
     //-	typdefs för iterator, const_iterator,  reverse_iterator och const_revers_iterator
     Vector<char>::iterator Str;
     //Vector<char>::reverse_iterator rStr;
@@ -176,20 +177,20 @@ void TestIterPart1() {
 #ifdef VG
     cout << "\nTestFörVälGodkänt Iter klar\n";
 #endif VG
+
 }
 
 #pragma region Test Iterator in Algorithm
-/*
-namespace std {
-    template <class IT>
-    void random_shuffle(IT begin, IT end) {
-        shuffle(begin, end, std::default_random_engine());
-    }
-}
-*/
+
+//namespace std {
+//    template <class IT>
+//    void random_shuffle(IT begin, IT end) {
+//        shuffle(begin, end, std::default_random_engine());
+//    }
+//}
 
 void TestIterInAlg() {
-    /*
+    
     static const int N = 26;
     Vector<char> v;
     v.reserve(N);
@@ -203,11 +204,11 @@ void TestIterInAlg() {
     std::random_shuffle(b, e);
 
     cout << v << endl;
+
     std::stable_sort(b, e);
     std::sort(b, e);
 
-    cout << v << endl;
-    */
+    cout << v << endl;  
 }
 
 //void TestRevIterInAlg() {

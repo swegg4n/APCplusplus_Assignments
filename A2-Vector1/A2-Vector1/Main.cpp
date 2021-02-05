@@ -7,7 +7,7 @@
 
 #include <type_traits>
 
-#include "Vector.hpp"
+//#include "Vector.hpp"
 #include "VectIterTest.h"
 
 
@@ -28,10 +28,9 @@ int main() {
     TestIterPart1();
     TestIterInAlg();
 
-#if 0
     new int;
     cout << "det finns en minnesläcka i main, avsiktligt!\n så ni kan se att er minnesläckstest fungerar\n";
-#endif
     std::cin.get();
 
 }
+

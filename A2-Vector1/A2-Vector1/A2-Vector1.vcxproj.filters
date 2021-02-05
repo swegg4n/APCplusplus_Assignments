@@ -21,14 +21,17 @@
     <ClInclude Include="Vector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VectIterTest.h">
+    <ClInclude Include="TestLevel.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="TestLevel.h">
+    <ClInclude Include="VectIterTest.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="VectBasicTest.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
     <ClCompile Include="VectIterTest.cpp">
       <Filter>Test</Filter>
     </ClCompile>
