@@ -41,11 +41,6 @@ private:
 			_ptr = nullptr;
 		};
 
-		//VectorItt(const VectorItt& other)
-		//{
-		//	_ptr = other._ptr;
-		//};
-
 		VectorItt<X>(const VectorItt<T>& other)
 		{
 			_ptr = other._ptr;
@@ -55,8 +50,6 @@ private:
 		{
 			_ptr = static_cast<T*>(p);
 		};
-
-		//VectorItt& operator=(const VectorItt& other) = default;
 
 		VectorItt<X>& operator=(const VectorItt<T>& other)
 		{
@@ -227,6 +220,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Contructor for testing. Generates a vector with one character on each address
+	/// </summary>
 	Vector(const char* other)
 	{
 		size_t otherSize = std::strlen(other);
@@ -349,6 +345,9 @@ public:
 		return _capacity;
 	};
 
+	/// <summary>
+	/// Reallocates memory (if necessary) to fit <paramref name="n"/> elements in the vector
+	/// </summary>
 	void reserve(size_t n)
 	{
 		if (n > _capacity)
@@ -367,6 +366,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Reallocates memory (if necessary) so only "size"-number of elements fit the vector
+	/// </summary>
 	void shrink_to_fit()
 	{
 		if (_capacity > _size)
@@ -385,6 +387,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Adds the value <paramref name="c"/> to the end of the vector. Reallocates if necessary
+	/// </summary>
 	void push_back(T c)
 	{
 		if (_size == _capacity)
@@ -395,6 +400,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Reallocates memory (if necessary) to fit <paramref name="n"/> elements in the list. Fills unused adresses with new T()
+	/// </summary>
 	void resize(size_t n)
 	{
 		if (n > _capacity)
@@ -412,6 +420,9 @@ public:
 		CHECK;
 	};
 
+	/// <summary>
+	/// Swaps this vector with <paramref name="other"/>
+	/// </summary>
 	void swap(Vector& other)
 	{
 		Vector temp(other);
