@@ -394,6 +394,8 @@ public:
 	{
 		if (_size == _capacity)
 			reserve(_capacity * 2);
+		if (_capacity == 0)
+			reserve(1);
 
 		_data[_size++] = c;
 
@@ -425,9 +427,9 @@ public:
 	/// </summary>
 	void swap(Vector& other)
 	{
-		Vector temp(other);
-		other = *this;
-		*this = temp;
+		std::swap(_data, other._data);
+		std::swap(_size, other._size);
+		std::swap(_capacity, other._capacity);
 
 		CHECK;
 	}
@@ -437,6 +439,9 @@ public:
 #pragma region Non-members
 	friend bool operator==(const Vector& lhs, const Vector& rhs)
 	{
+		if (lhs.size() != rhs.size())
+			return false;
+
 		auto lhs_it = lhs.begin();
 		auto rhs_it = rhs.begin();
 
@@ -445,7 +450,7 @@ public:
 			if (*lhs_it != *rhs_it)
 				return false;
 		}
-		return lhs_it == lhs.end() && rhs_it == rhs.end();
+		return true;
 	};
 
 	friend bool operator!=(const Vector& lhs, const Vector& rhs)
@@ -497,7 +502,10 @@ public:
 
 	bool Invariant() const
 	{
-		return (_data != nullptr) && (_size <= _capacity);
+		if (_data == nullptr)
+			return _capacity == 0;
+		else
+			return _size <= _capacity;
 	}
 
 };
