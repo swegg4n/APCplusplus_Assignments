@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#define LEVEL 6
+#define LEVEL 7
 #define VG true
 
 #if LEVEL>=1
@@ -67,6 +67,7 @@ void TestRemoveAllConst() {
     AssertSame(int, RAC<int>::type);
     AssertSame(int, RAC<const int>::type);
     AssertSame(int*, RAC<int*>::type);
+    AssertSame(int&, RAC<const int&>::type);
 #pragma warning( push )
 #pragma warning( disable : 4114)
     AssertSame(int***, RAC<const int const* const* const*const>::type);

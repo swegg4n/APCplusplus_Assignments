@@ -7,11 +7,16 @@ struct RAC {
 };
 
 template<class T>
-struct RAC<T*> {
-	using type = T*;
+struct RAC<const T> {
+	typedef typename RAC<T>::type type;
 };
 
 template<class T>
-struct RAC<const T> {
-	using type = T;
+struct RAC<T*> {
+	typedef typename RAC<T>::type* type;
+};
+
+template<class T>
+struct RAC<T&> {
+	typedef typename RAC<T>::type& type;
 };
