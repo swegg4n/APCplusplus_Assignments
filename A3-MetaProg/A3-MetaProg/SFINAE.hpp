@@ -1,13 +1,14 @@
 #pragma once
 
 
-template<class T, std::enable_if<std::is_nothrow_copy_constructible<T>::value> = true>
+
+template<class T, class = std::enable_if_t<std::is_nothrow_copy_constructible<T>::value>>
 bool NoThrowCopyConstructible(T t)
-{ 
+{
 	return true;
 }
 
-template<class T, std::enable_if<std::is_nothrow_copy_constructible<T>::value> = false>
+template<class T, class = std::enable_if_t<!std::is_nothrow_copy_constructible<T>::value>>
 bool NoThrowCopyConstructible(T t)
 {
 	return false;
