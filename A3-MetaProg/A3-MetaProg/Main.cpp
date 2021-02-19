@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#define LEVEL 7
+#define LEVEL 99
 #define VG true
 
 #if LEVEL>=1
@@ -89,7 +89,7 @@ void TestSum() {
 void TestSFINAE() {
     int i(3);
     assert(NoThrowCopyConstructible(i));
-    auto str = string("hej");
+    auto str = std::string("hej");
     assert(!NoThrowCopyConstructible(str));
 }
 #endif
