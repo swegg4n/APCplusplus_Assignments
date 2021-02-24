@@ -32,16 +32,16 @@ struct SimplifyType<const T> {
 	using type = T;
 };
 
-template<class T>
-struct SimplifyType<const T*> {
-	using type = const T;
-};
-
-template<class T>
-struct SimplifyType<const T&> {
-	using type = const T;
-};
-
+//template<class T>
+//struct SimplifyType<const T*> {
+//	using type = const T;
+//};
+//
+//template<class T>
+//struct SimplifyType<const T&> {
+//	using type = const T;
+//};
+//
 template<class T>
 struct SimplifyType<const T[]> {
 	using type = const T;
@@ -81,19 +81,19 @@ struct BaseType<const T> {
 	using type = BaseType_t<T>;
 };
 
-template<class T>
-struct BaseType<const T*> {
-	using type = BaseType_t<T>;
-};
-
-template<class T>
-struct BaseType<const T&> {
-	using type = BaseType_t<T>;
-};
-
-template<class T>
-struct BaseType<const T[]> {
-	using type = BaseType_t<T>;
-};
+//template<class T>
+//struct BaseType<const T*> {
+//	using type = BaseType_t<T>;
+//};
+//
+//template<class T>
+//struct BaseType<const T&> {
+//	using type = BaseType_t<T>;
+//};
+//
+//template<class T>
+//struct BaseType<const T[]> {
+//	using type = BaseType_t<T>;
+//};
 
 #pragma endregion
