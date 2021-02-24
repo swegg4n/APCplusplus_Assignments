@@ -34,8 +34,8 @@
 /*
  Thread count
  */
- //#define NBRTHREADS_AUTO
-#define NBRTHREADS 1
+//#define NBRTHREADS_AUTO
+#define NBRTHREADS 10
 
 /*
  Tile size
@@ -44,15 +44,15 @@
 
  /*
   Filter type
+  -GRAYSCALE: Set each color component to G(RGB).
   -INVERT: Invert colors component-wise.
   -GAUSS BLUR: Convolve an area around each pixel with a Gauss kernel.
-  -GRAYSCALE: Set each color component to G(RGB).
   -SOBEL (edge detection): Convolve an area around the pixel with a Sobel kernel.
   */
 //#define FILTER_GRAYSCALE
-  //#define FILTER_INVERT
-  //#define FILTER_BLUR
-  #define FILTER_SOBEL
+//#define FILTER_INVERT
+#define FILTER_BLUR
+//#define FILTER_SOBEL
 
   /*
    Gauss kernel size (applies only to FILTER_BLUR)

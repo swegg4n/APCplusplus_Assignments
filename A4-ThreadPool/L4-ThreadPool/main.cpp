@@ -338,12 +338,12 @@ int main(int argc, const char* argv[])
 		}
 #endif
 
-//#ifdef THREADPOOL
-//	std::cout << "Waiting for jobs (tiles) to finish ..." << std::endl;
-//	for (auto&& result : results)
-//		std::cout << result.get() << ' ';
-//	std::cout << std::endl;
-//#endif
+#ifdef THREADPOOL
+	std::cout << "Waiting for jobs (tiles) to finish ..." << std::endl;
+	for (auto&& result : results)
+		std::cout << result.get() << ' ';
+	std::cout << std::endl;
+#endif
 
 	// Show timings
 	auto end = std::chrono::high_resolution_clock::now();

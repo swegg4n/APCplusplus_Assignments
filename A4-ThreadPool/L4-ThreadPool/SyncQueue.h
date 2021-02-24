@@ -13,9 +13,6 @@ private:
 	std::queue<T> _queue;
 	std::mutex _mutex;
 
-	//void lock() {
-	//	std::unique_lock<std::mutex> lock(_mutex);
-	//}
 
 public:
 

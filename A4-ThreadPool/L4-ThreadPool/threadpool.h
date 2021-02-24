@@ -18,6 +18,7 @@ private:
 
 		threadpool* _threadpool;
 
+
 	public:
 
 		Task(threadpool* threadpool) {
@@ -53,12 +54,12 @@ private:
 public:
 
 	threadpool(size_t threads) {
-		_running = true;
 		_threads = std::vector<std::thread>(threads);
 		for (size_t i = 0; i < threads; i++)
 		{
 			_threads[i] = std::thread(Task(this));
 		}
+		_running = true;
 	}
 
 	~threadpool() {
@@ -79,10 +80,10 @@ public:
 	auto enqueue(F&& f, Args&&... args) {
 		auto task = std::make_shared<std::packaged_task<decltype(f(args...))()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 
-		std::function<void()> out_func = [task]() {
+		std::function<void()> out_f = [task]() {
 			(*task)();
 		};
-		_queue.enqueue(out_func);
+		_queue.enqueue(out_f);
 		_conditionLock.notify_one();
 		return task->get_future();
 	}
