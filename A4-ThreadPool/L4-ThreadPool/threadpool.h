@@ -31,7 +31,7 @@ private:
 			while (_threadpool->_running)
 			{
 				std::unique_lock<std::mutex> lock(_threadpool->_mutex);
-				if (_threadpool->_queue.empty())
+				while (_threadpool->_queue.empty())
 					_threadpool->_conditionLock.wait(lock);
 
 				f = _threadpool->_queue.dequeue();
