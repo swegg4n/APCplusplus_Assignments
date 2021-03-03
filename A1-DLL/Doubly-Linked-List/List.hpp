@@ -460,7 +460,7 @@ public:
 
 
 	/// <summary>
-	/// Method for checking if the lists pointes point to the correct elements
+	/// Method for checking if the lists pointers point to the correct elements
 	/// </summary>
 	bool Invariant() const
 	{
