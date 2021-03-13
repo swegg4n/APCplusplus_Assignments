@@ -188,8 +188,7 @@ public:
 	Vector() noexcept
 	{
 		_size = 0;
-		_capacity = 4;
-		_data = _dAlloc.allocate(_capacity);
+		_capacity = 0;
 
 		CHECK;
 	};
@@ -198,12 +197,28 @@ public:
 	Vector(size_t newCapacity, Titer begin, Titer end)
 	{
 		_size = 0;
-		_capacity = newCapacity;
-		_data = _dAlloc.allocate(_capacity);
 
-		for (auto it = begin; it != end; ++it)
+		try
 		{
-			push_back(*it);
+			_capacity = newCapacity;
+			_data = _dAlloc.allocate(_capacity);
+
+			for (auto it = begin; it != end; ++it)
+			{
+				new(_data + _size) T(*it);
+				++_size;
+			}
+		}
+		catch (const std::exception&)
+		{
+			for (; _size > 0; _size--)
+			{
+				_data[_size - 1].~T();
+			}
+			_dAlloc.deallocate(_data, _capacity);
+			_capacity = 0;
+
+			throw std::exception("Failed to construct vector");
 		}
 
 		CHECK;
@@ -233,7 +248,7 @@ public:
 #pragma region Assignment - Test
 	Vector& AssSimple(const Vector& other)
 	{
-		if (*this == other)
+		if (this == &other)
 			return *this;
 
 		reserve(other._size);	//Only reserves more space if needed!
@@ -251,7 +266,7 @@ public:
 
 	Vector& AssFast(const Vector& other)
 	{
-		if (*this == other)
+		if (this == &other)
 			return *this;
 
 		reserve(other._size);	//Only reserves more space if needed!
@@ -269,7 +284,7 @@ public:
 
 	Vector& AssStrong(const Vector& other)
 	{
-		if (*this == other)
+		if (this == &other)
 			return *this;
 
 		reserve(other._size);	//Only reserves more space if needed!
@@ -322,18 +337,18 @@ public:
 		return _data[i];
 	};
 
-	T& at(size_t i)	noexcept
+	T& at(size_t i)
 	{
 		if (i >= _size)
-			throw std::out_of_range("");
+			throw std::out_of_range("Index out of range");
 		else
 			return _data[i];
 	};
 
-	const T& at(size_t i) const	noexcept
+	const T& at(size_t i) const
 	{
 		if (i >= _size)
-			throw std::out_of_range("");
+			throw std::out_of_range("Index out of range");
 		else
 			return _data[i];
 	};
@@ -387,15 +402,40 @@ public:
 	{
 		if (n > _capacity)
 		{
-			T* newData = _dAlloc.allocate(n);
-			for (size_t i = 0; i < _size; i++)
+			if (_data == nullptr)
 			{
-				newData[i] = _data[i];
+				_data = _dAlloc.allocate(n);
+				_size = 0;
+				_capacity = n;
 			}
+			else
+			{
+				T* newData = _dAlloc.allocate(n);
+				size_t i = 0;
 
-			_dAlloc.deallocate(_data, _capacity);
-			_data = newData;
-			_capacity = n;
+				try
+				{
+					for (; i < _size; i++)
+					{
+						new(newData + i) T(_data[i]);
+					}
+					_dAlloc.deallocate(_data, _capacity);
+					_data = newData;
+					_capacity = n;
+				}
+				catch (const std::exception&)
+				{
+					for (; i > 0; i--)
+					{
+						newData[i].~T();
+					}
+					_dAlloc.deallocate(_data, n);
+					_size = 0;
+					_capacity = n;
+
+					throw std::exception("Failed to reserve space");
+				}
+			}
 		}
 
 		CHECK;
@@ -409,52 +449,54 @@ public:
 		if (_capacity > _size)
 		{
 			T* newData = _dAlloc.allocate(_size);
-			for (size_t i = 0; i < _size; i++)
-			{
-				newData[i] = _data[i];
-			}
+			size_t oldCap = _capacity;
+			size_t i = 0;
 
-			_dAlloc.deallocate(_data, _capacity);
-			_capacity = _size;
-			_data = newData;
+			try
+			{
+				for (; i < _size; i++)
+				{
+					new(newData + i) T(_data[i]);
+				}
+				_dAlloc.deallocate(_data, _capacity);
+				_capacity = _size;
+				_data = newData;
+			}
+			catch (const std::exception&)
+			{
+				for (; i > 0; i++)
+				{
+					newData[i].~T();
+				}
+				_dAlloc.deallocate(newData, _size);
+				_capacity = oldCap;
+
+				throw std::exception("Failed shrink_to_fit");
+			}
 		}
 
 		CHECK;
 	};
 
 	/// <summary>
-	/// Adds the value <paramref name="c"/> to the end of the vector. Reallocates if necessary
+	/// Places the value <paramref name="c"/> at the end of the vector
 	/// </summary>
 	void push_back(const T& c)
 	{
-		if (_capacity == 0)
-			reserve(1);
-		else if (_size == _capacity)
-			reserve(_capacity * 2);
-
-		new(_data + _size) T(c);
-		++_size;
-
-		CHECK;
+		emplace_back(c);
 	};
 
 	/// <summary>
-	/// Moves the value <paramref name="c"/> to the end of the vector. Reallocates if necessary
+	/// Moves the value <paramref name="c"/> to the end of the vector
 	/// </summary>
 	void push_back(T&& c)
 	{
-		if (_capacity == 0)
-			reserve(1);
-		else if (_size == _capacity)
-			reserve(_capacity * 2);
-
-		new(_data + _size) T(std::move(c));
-		++_size;
-
-		CHECK;
+		emplace_back(std::move(c));
 	}
 
-	/*
+	/// <summary>
+	/// Constructs a new element at the end of the vector
+	/// </summary>
 	template<class... Args>
 	T& emplace_back(Args&&... args)
 	{
@@ -463,10 +505,14 @@ public:
 		else if (_size == _capacity)
 			reserve(_capacity * 2);
 
-		new (_data + _size++) T(std::forward<Args>(args)...);
-		return *(_data + size - 1);
+		new(_data + _size) T(std::forward<Args>(args)...);
+		++_size;
+
+		CHECK;
+
+		return *(_data + _size - 1);
 	}
-	*/
+
 
 	/// <summary>
 	/// Reallocates memory (if necessary) to fit <paramref name="n"/> elements in the list. Fills unused adresses with new T()
@@ -480,7 +526,7 @@ public:
 		{
 			for (size_t i = _size; i < n; i++)
 			{
-				_data[i] = T();
+				new (_data + i) T();
 			}
 		}
 		_size = n;

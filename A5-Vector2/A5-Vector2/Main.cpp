@@ -55,9 +55,10 @@ int main() {
     TestBasic();
     TestVector();
     TestIter();
+
     //TestIterInAlg();
     //TestRevIterInAlg();
 
-    Dalloc<double>().allocate(1); cout << "det finns en minnesläcka i main, avsiktligt!\n så ni kan se att er minnesläckstest fungerar\n";
+//    Dalloc<double>().allocate(1); cout << "\n\ndet finns en minnesläcka i main, avsiktligt!\n så ni kan se att er minnesläckstest fungerar\n";
     //std::cin.get();
 }

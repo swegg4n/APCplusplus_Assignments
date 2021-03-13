@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cassert>
 
 namespace {
     //We assume that Dalloc set unused memory to 1
