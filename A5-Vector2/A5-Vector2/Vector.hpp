@@ -246,24 +246,29 @@ public:
 
 
 #pragma region Assignment - Test
+	/// <summary>
+	/// Simple implementation of the assign function.
+	/// Pros: Simple to implement
+	/// Cons: 1 extra reallocation
+	/// </summary>
 	Vector& AssSimple(const Vector& other)
 	{
 		if (this == &other)
 			return *this;
 
-		reserve(other._size);	//Only reserves more space if needed!
-		_size = other._size;
-
-		for (size_t i = 0; i < _size; i++)
-		{
-			_data[i] = other._data[i];
-		}
+		Vector copy(other);
+		swap(copy);
 
 		CHECK;
 
 		return *this;
 	};
 
+	/// <summary>
+	/// Fast implementation of the assign function.
+	/// Pros: Assignment is performed efficiently and fast
+	/// Cons: Upon error, data is left in an inconsistent state
+	/// </summary>
 	Vector& AssFast(const Vector& other)
 	{
 		if (this == &other)
@@ -282,19 +287,36 @@ public:
 		return *this;
 	};
 
+	/// <summary>
+	/// Strong implementation of the assign function.
+	/// Pros: Upon error, data is reset, leaving the vector in the same state it was before this call
+	/// Cons: The function is slower to run
+	/// </summary>
 	Vector& AssStrong(const Vector& other)
 	{
 		if (this == &other)
 			return *this;
 
-		reserve(other._size);	//Only reserves more space if needed!
-		_size = other._size;
+		Vector original(other);
 
-		for (size_t i = 0; i < _size; i++)
+		try
 		{
-			_data[i] = other._data[i];
-		}
+			reserve(other._size);	//Only reserves more space if needed!
+			_size = other._size;
 
+			for (size_t i = 0; i < _size; i++)
+			{
+				_data[i] = other._data[i];
+			}
+		}
+		catch (const std::exception&)
+		{
+			_dAlloc.deallocate(_data, _capacity);
+			_data = original.data;
+			_size = original._size;
+			_capacity = original._capacity;
+		}
+		
 		CHECK;
 
 		return *this;
@@ -304,7 +326,9 @@ public:
 
 	Vector& operator=(const Vector& other)
 	{
+		//return AssSimple(other);
 		return AssFast(other);
+		//return AssStrong(other);
 	};
 
 	Vector& operator=(Vector&& other) noexcept
@@ -339,7 +363,7 @@ public:
 
 	T& at(size_t i)
 	{
-		if (i >= _size)
+		if (i < 0 || i >= _size)
 			throw std::out_of_range("Index out of range");
 		else
 			return _data[i];
@@ -347,7 +371,7 @@ public:
 
 	const T& at(size_t i) const
 	{
-		if (i >= _size)
+		if (i < 0 || i >= _size)
 			throw std::out_of_range("Index out of range");
 		else
 			return _data[i];
@@ -433,7 +457,7 @@ public:
 					_size = 0;
 					_capacity = n;
 
-					throw std::exception("Failed to reserve space");
+					throw std::exception("reserve - FAIL");
 				}
 			}
 		}
@@ -471,7 +495,7 @@ public:
 				_dAlloc.deallocate(newData, _size);
 				_capacity = oldCap;
 
-				throw std::exception("Failed shrink_to_fit");
+				throw std::exception("shrink_to_fit - FAIL");
 			}
 		}
 
@@ -505,8 +529,15 @@ public:
 		else if (_size == _capacity)
 			reserve(_capacity * 2);
 
-		new(_data + _size) T(std::forward<Args>(args)...);
-		++_size;
+		try
+		{
+			new(_data + _size) T(std::forward<Args>(args)...);
+			++_size;
+		}
+		catch (const std::exception&)
+		{
+			throw std::exception("emplace_back - FAIL");
+		}
 
 		CHECK;
 
@@ -519,8 +550,7 @@ public:
 	/// </summary>
 	void resize(size_t n)
 	{
-		if (n > _capacity)
-			reserve(n);
+		reserve(n);		//Only reserves more space if necessary
 
 		if (n > _size)
 		{
