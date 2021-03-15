@@ -249,7 +249,7 @@ public:
 	/// <summary>
 	/// Simple implementation of the assign function.
 	/// Pros: Simple to implement
-	/// Cons: 1 extra reallocation
+	/// Cons: Extra reallocation (inefficient & slow)
 	/// </summary>
 	Vector& AssSimple(const Vector& other)
 	{
@@ -267,7 +267,8 @@ public:
 	/// <summary>
 	/// Fast implementation of the assign function.
 	/// Pros: Assignment is performed efficiently and fast
-	/// Cons: Upon error, data is left in an inconsistent state
+	/// Cons: Upon error, data is NOT reset, meaning a vector could end up being half copied
+	///		  Upon error, we dont know what the vector contains
 	/// </summary>
 	Vector& AssFast(const Vector& other)
 	{
@@ -275,12 +276,22 @@ public:
 			return *this;
 
 		reserve(other._size);	//Only reserves more space if needed!
-		_size = other._size;
 
-		for (size_t i = 0; i < _size; i++)
+		if (other._size <= _size)
 		{
-			_data[i] = other._data[i];
+			std::copy(other.begin(), other.begin() + other._size, _data);
+
+			for (size_t i = other._size; i < _size; i++)
+			{
+				_data[i].~T();
+			}
 		}
+		else
+		{
+			std::copy(other.begin(), other.end(), _data);
+		}
+
+		_size = other._size;
 
 		CHECK;
 
@@ -290,7 +301,7 @@ public:
 	/// <summary>
 	/// Strong implementation of the assign function.
 	/// Pros: Upon error, data is reset, leaving the vector in the same state it was before this call
-	/// Cons: The function is slower to run
+	/// Cons: Extra allocation, slower to run
 	/// </summary>
 	Vector& AssStrong(const Vector& other)
 	{
@@ -312,11 +323,11 @@ public:
 		catch (const std::exception&)
 		{
 			_dAlloc.deallocate(_data, _capacity);
-			_data = original.data;
+			_data = original._data;
 			_size = original._size;
 			_capacity = original._capacity;
 		}
-		
+
 		CHECK;
 
 		return *this;
