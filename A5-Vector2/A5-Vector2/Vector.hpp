@@ -248,14 +248,12 @@ public:
 #pragma region Assignment - Test
 	/// <summary>
 	/// Simple implementation of the assign function.
-	/// Pros: Simple to implement
+	/// Pros: Simple to implement.
+	///		  Upon error, data is reset to it's original state
 	/// Cons: Extra reallocation (inefficient & slow)
 	/// </summary>
 	Vector& AssSimple(const Vector& other)
 	{
-		if (this == &other)
-			return *this;
-
 		Vector copy(other);
 		swap(copy);
 
@@ -288,7 +286,12 @@ public:
 		}
 		else
 		{
-			std::copy(other.begin(), other.end(), _data);
+			std::copy(other.begin(), other.begin() + _size, _data);
+
+			for (size_t i = _size; i < other._size; i++)
+			{
+				new (_data + i) T(other._data[i]);
+			}
 		}
 
 		_size = other._size;
@@ -300,33 +303,14 @@ public:
 
 	/// <summary>
 	/// Strong implementation of the assign function.
-	/// Pros: Upon error, data is reset, leaving the vector in the same state it was before this call
-	/// Cons: Extra allocation, slower to run
+	/// Pros: Simple to implement
+	///		  Upon error, data is reset to it's original state
+	/// Cons: Extra reallocation (inefficient & slow)
 	/// </summary>
 	Vector& AssStrong(const Vector& other)
 	{
-		if (this == &other)
-			return *this;
-
-		Vector original(other);
-
-		try
-		{
-			reserve(other._size);	//Only reserves more space if needed!
-			_size = other._size;
-
-			for (size_t i = 0; i < _size; i++)
-			{
-				_data[i] = other._data[i];
-			}
-		}
-		catch (const std::exception&)
-		{
-			_dAlloc.deallocate(_data, _capacity);
-			_data = original._data;
-			_size = original._size;
-			_capacity = original._capacity;
-		}
+		Vector copy(other);
+		swap(copy);
 
 		CHECK;
 
@@ -499,7 +483,7 @@ public:
 			}
 			catch (const std::exception&)
 			{
-				for (; i > 0; i++)
+				for (; i > 0; i--)
 				{
 					newData[i].~T();
 				}
