@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="Counter.hpp" />
     <ClInclude Include="SharedPtr.hpp" />
     <ClInclude Include="WeakPtr.hpp" />
   </ItemGroup>

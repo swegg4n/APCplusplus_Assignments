@@ -1,82 +1,89 @@
 #pragma once
 
 #include "WeakPtr.hpp"
-#include <algorithm>
+#include "Counter.hpp"
+
+template<class T> class WeakPtr;
 
 
 template <class T>
 class SharedPtr
 {
+public:
+	friend class WeakPtr<T>;
+
 
 private:
 
-	T* _ptr = nullptr;
-	size_t* _useCount = nullptr;
-
+	T* _ptr;
+	Counter<T>* _counter;
 
 
 	void add_use(T* other)
 	{
 		if (other != nullptr)
 		{
-			if (_useCount != nullptr)
+			if (_counter != nullptr)
 			{
-				++(*_useCount);
+				_counter->Increment_shared();
 			}
 			else
 			{
-				_useCount = new size_t(1);
+				_counter = new Counter<T>();
 			}
 		}
 	}
 
 	void remove_use()
 	{
-		if (_useCount != nullptr)
+		if (_counter != nullptr && _counter->Decrement_shared() == 0)
 		{
-			if (-- * _useCount <= 0)
+			delete _ptr;
+
+			if (_counter->Decrement_weak() == 0)
 			{
-				delete _ptr;
-				delete _useCount;
+				delete _counter;
 			}
-			_useCount = nullptr;
 		}
+
 		_ptr = nullptr;
+		_counter = nullptr;
 	}
 
 
 public:
 
-	SharedPtr() : _ptr(nullptr), _useCount(nullptr) { }
+	SharedPtr() : _ptr(nullptr), _counter(nullptr) {}
 
-	SharedPtr(T* other)
+	SharedPtr(T* other) : _ptr(other), _counter(new Counter<T>()) {}
+
+	SharedPtr(const std::nullptr_t) : _ptr(nullptr), _counter(nullptr) {}
+
+	SharedPtr(const WeakPtr<T>& other) : _ptr(other._ptr), _counter(nullptr)
 	{
-		_ptr = other;
-		_useCount = nullptr;
-		add_use(other);
+		if (other.expired())
+			throw std::exception("Construction of SharedPtr FAIL - WeakPtr is expired");
+		else
+			add_use(other._ptr);
 	}
 
-	SharedPtr(const std::nullptr_t)
-	{
-		remove_use();
-	}
-
-	SharedPtr(SharedPtr& other)
+	SharedPtr(SharedPtr& other) : _ptr(nullptr), _counter(nullptr)
 	{
 		if (this != &other)
 		{
 			_ptr = other._ptr;
-			_useCount = other._useCount;
+			_counter = other._counter;
+
 			add_use(_ptr);
 		}
 	}
 
-	SharedPtr(SharedPtr&& other) noexcept
+	SharedPtr(SharedPtr&& other) : _ptr(nullptr), _counter(nullptr)
 	{
 		if (this != &other)
 		{
 			_ptr = other._ptr;
-			_useCount = other._useCount;
+			_counter = other._counter;
 
 			add_use(_ptr);
 			other.remove_use();
@@ -89,14 +96,14 @@ public:
 	}
 
 
-	SharedPtr& operator=(const SharedPtr& other)
+	SharedPtr& operator=(const SharedPtr& other) noexcept
 	{
 		if (this != &other)
 		{
 			remove_use();
 
 			_ptr = other._ptr;
-			_useCount = other._useCount;
+			_counter = other._counter;
 
 			add_use(_ptr);
 		}
@@ -111,7 +118,7 @@ public:
 			remove_use();
 
 			_ptr = other._ptr;
-			_useCount = other._useCount;
+			_counter = other._counter;
 
 			add_use(_ptr);
 			other.remove_use();
@@ -156,8 +163,9 @@ public:
 	}
 
 
-	void reset()
+	void reset() noexcept
 	{
+		//SharedPtr{}.swap(*this);
 		remove_use();
 	}
 
@@ -173,21 +181,40 @@ public:
 
 	size_t use_count()
 	{
-		return *_useCount;
+		if (_ptr != nullptr)
+		{
+			return _counter->Shared_useCount();
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	const size_t use_count() const
+	{
+		if (_ptr != nullptr)
+		{
+			return _counter->Shared_useCount();
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
 
 	void swap(SharedPtr<T>& rhs) noexcept
 	{
 		std::swap(_ptr, rhs._ptr);
-		std::swap(_useCount, rhs._useCount);
+		std::swap(_counter, rhs._counter);
 	}
 
 
 	bool Invariant()
 	{
-		return (_ptr == nullptr && _useCount == 0)
-			|| (_ptr != nullptr && _useCount > 0);
+		return (_ptr == nullptr && _counter == nullptr)
+			|| (_ptr != nullptr && _counter != nullptr);
 	}
 
 };

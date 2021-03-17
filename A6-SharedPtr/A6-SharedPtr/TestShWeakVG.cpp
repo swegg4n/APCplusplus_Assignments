@@ -4,6 +4,7 @@
 
 #include "SharedPtr.hpp"
 #include "WeakPtr.hpp"
+#include <cassert>
 
 namespace {
     struct C {
