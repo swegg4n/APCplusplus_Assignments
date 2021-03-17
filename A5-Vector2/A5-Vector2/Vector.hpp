@@ -182,22 +182,22 @@ public:
 #pragma region Constructors and assignment
 	~Vector() noexcept
 	{
+		for (size_t i = _size; i > 0; i--)
+		{
+			_data[i - 1].~T();
+		}
+
 		_dAlloc.deallocate(_data, _capacity);
 	};
 
-	Vector() noexcept
+	Vector() noexcept : _data(nullptr), _size(0), _capacity(0)
 	{
-		_size = 0;
-		_capacity = 0;
-
 		CHECK;
 	};
 
 	template<class Titer>
-	Vector(size_t newCapacity, Titer begin, Titer end)
+	Vector(size_t newCapacity, Titer begin, Titer end) : _data(nullptr), _size(0)
 	{
-		_size = 0;
-
 		try
 		{
 			_capacity = newCapacity;
@@ -216,7 +216,6 @@ public:
 				_data[_size - 1].~T();
 			}
 			_dAlloc.deallocate(_data, _capacity);
-			_capacity = 0;
 
 			throw std::exception("Failed to construct vector");
 		}
@@ -283,18 +282,18 @@ public:
 			{
 				_data[i].~T();
 			}
+
+			_size = other._size;
 		}
 		else
 		{
 			std::copy(other.begin(), other.begin() + _size, _data);
 
-			for (size_t i = _size; i < other._size; i++)
+			for (; _size < other._size; _size++)
 			{
-				new (_data + i) T(other._data[i]);
+				new (_data + _size) T(other._data[_size]);
 			}
 		}
-
-		_size = other._size;
 
 		CHECK;
 
@@ -549,11 +548,19 @@ public:
 
 		if (n > _size)
 		{
-			for (size_t i = _size; i < n; i++)
+			for (; _size < n; _size++)
 			{
-				new (_data + i) T();
+				new (_data + _size) T();
 			}
 		}
+		else
+		{
+			for (; _size > n; _size--)
+			{
+				_data[_size - 1].~T();
+			}
+		}
+
 		_size = n;
 
 		CHECK;
