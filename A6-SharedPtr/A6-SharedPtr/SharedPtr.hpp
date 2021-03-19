@@ -40,7 +40,7 @@ private:
 		{
 			delete _ptr;
 
-			if (_counter->Decrement_weak() == 0)
+			if (_counter->Weak_useCount() == 0)
 			{
 				delete _counter;
 			}
@@ -59,12 +59,18 @@ public:
 
 	SharedPtr(const std::nullptr_t) : _ptr(nullptr), _counter(nullptr) {}
 
-	SharedPtr(const WeakPtr<T>& other) : _ptr(other._ptr), _counter(nullptr)
+	SharedPtr(WeakPtr<T>& other)
 	{
 		if (other.expired())
-			throw std::exception("Construction of SharedPtr FAIL - WeakPtr is expired");
+		{
+			throw std::bad_weak_ptr();
+		}
 		else
+		{
+			_ptr = other._ptr;
+			_counter = other._counter;
 			add_use(other._ptr);
+		}
 	}
 
 	SharedPtr(SharedPtr& other) : _ptr(nullptr), _counter(nullptr)
@@ -78,7 +84,7 @@ public:
 		}
 	}
 
-	SharedPtr(SharedPtr&& other) : _ptr(nullptr), _counter(nullptr)
+	SharedPtr(SharedPtr&& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -165,7 +171,6 @@ public:
 
 	void reset() noexcept
 	{
-		//SharedPtr{}.swap(*this);
 		remove_use();
 	}
 

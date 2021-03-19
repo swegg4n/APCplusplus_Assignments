@@ -32,11 +32,8 @@ public:
 
 	WeakPtr<T>& operator=(const SharedPtr<T>& other)
 	{
-		_ptr = other._ptr;	//(0)
+		_ptr = other._ptr;
 		_counter = other._counter;
-
-		//WeakPtr copy(other);	//(1)
-		//this->swap(copy);
 
 		return *this;
 	}
@@ -44,19 +41,30 @@ public:
 
 	SharedPtr<T> lock() noexcept
 	{
-		return expired() ? nullptr : SharedPtr<T>(*this);
+		return expired() ? SharedPtr<T>() : SharedPtr<T>(*this);
 	}
 
-	bool expired() const noexcept
+	bool expired() noexcept
 	{
 		if (_counter != nullptr)
 		{
-			return _counter->Shared_useCount() == 0;
+			if (_counter->Shared_useCount() == 0)
+			{
+				_ptr = nullptr;
+				delete _counter;
+				_counter = nullptr;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 		else
 		{
 			return true;
 		}
+
 		//return (_counter) ? _counter->Shared_useCount() == 0 : true;
 	}
 

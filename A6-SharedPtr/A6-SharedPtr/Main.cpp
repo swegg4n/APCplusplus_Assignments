@@ -21,7 +21,7 @@ int main() {
 
     cout << "Test for VG finished\n";
 #endif //  VGBETYG
-    new int; cout << "you should get a memory leak (new int)\n";
-    //    std::cin.get();
+    //new int; cout << "you should get a memory leak (new int)\n";
+        std::cin.get();
 }
 

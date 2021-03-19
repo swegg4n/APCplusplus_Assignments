@@ -15,11 +15,7 @@ public:
 
 	Counter() : _shared_useCount(1), _weak_useCount(1) {}
 
-	~Counter()
-	{
-		//_shared_useCount = 0;
-		//_weak_useCount = 0;
-	}
+	~Counter() = default;
 
 
 	size_t Increment_shared() noexcept
