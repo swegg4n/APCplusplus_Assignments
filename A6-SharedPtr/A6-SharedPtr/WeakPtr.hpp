@@ -50,9 +50,10 @@ public:
 		{
 			if (_counter->Shared_useCount() == 0)
 			{
-				_ptr = nullptr;
 				delete _counter;
+				_ptr = nullptr;
 				_counter = nullptr;
+
 				return true;
 			}
 			else
@@ -77,7 +78,8 @@ public:
 
 	bool Invariant()
 	{
-		return true;
+		return (_ptr == nullptr && _counter == nullptr)
+			|| (_ptr != nullptr && _counter != nullptr);
 	}
 
 };

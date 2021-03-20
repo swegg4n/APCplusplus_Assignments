@@ -138,9 +138,9 @@ public:
 	{
 		return _ptr == nullptr;
 	}
-	bool operator<(const std::nullptr_t rhs) const
+	bool operator<(const std::nullptr_t) const
 	{
-		return _ptr < *rhs.get();
+		return _ptr < nullptr;
 	}
 	bool operator==(const SharedPtr& rhs) const
 	{
@@ -171,6 +171,7 @@ public:
 
 	void reset() noexcept
 	{
+		//SharedPtr<T>().swap(*this);
 		remove_use();
 	}
 
@@ -186,26 +187,12 @@ public:
 
 	size_t use_count()
 	{
-		if (_ptr != nullptr)
-		{
-			return _counter->Shared_useCount();
-		}
-		else
-		{
-			return 0;
-		}
+		return (_counter) ? _counter->Shared_useCount() : 0;
 	}
 
 	const size_t use_count() const
 	{
-		if (_ptr != nullptr)
-		{
-			return _counter->Shared_useCount();
-		}
-		else
-		{
-			return 0;
-		}
+		return (_counter) ? _counter->Shared_useCount() : 0;
 	}
 
 
