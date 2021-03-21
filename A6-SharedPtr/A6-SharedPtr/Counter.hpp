@@ -24,7 +24,7 @@ public:
 	}
 	size_t Increment_weak() noexcept
 	{
-		return ++_weak_useCount;
+		 return ++_weak_useCount;
 	}
 
 	size_t Decrement_shared() noexcept
@@ -44,8 +44,7 @@ public:
 
 	size_t Weak_useCount()
 	{
-		//return _weak_useCount;
-		//return _weak_useCount - ((_shared_useCount > 0) ? 1 : 0);
+		return _weak_useCount;
 	}
 
 };

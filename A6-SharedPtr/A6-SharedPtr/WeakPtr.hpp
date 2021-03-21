@@ -39,11 +39,28 @@ public:
 	}
 
 
-	WeakPtr<T>& operator=(const SharedPtr<T>& other)
+	WeakPtr<T>& operator=(const WeakPtr<T>& other)
 	{
+		if (other._counter && _counter)
+			_counter->Increment_weak();
+		else if (_counter)
+			_counter->Decrement_weak();
+
 		_ptr = other._ptr;
 		_counter = other._counter;
-		if (_counter) _counter->Increment_weak();
+
+		return *this;
+	}
+
+	WeakPtr<T>& operator=(const SharedPtr<T>& other)
+	{
+		if (other._counter && _counter)
+			_counter->Increment_weak();
+		else if (_counter)
+			_counter->Decrement_weak();
+
+		_ptr = other._ptr;
+		_counter = other._counter;
 
 		return *this;
 	}
@@ -60,7 +77,7 @@ public:
 		{
 			if (_counter->Shared_useCount() == 0)
 			{
-				delete _counter;
+				delete _counter;	//optimization
 				_ptr = nullptr;
 				_counter = nullptr;
 
@@ -75,8 +92,6 @@ public:
 		{
 			return true;
 		}
-
-		//return (_counter) ? _counter->Shared_useCount() == 0 : true;
 	}
 
 	void swap(WeakPtr<T>& rhs) noexcept

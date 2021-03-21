@@ -174,7 +174,6 @@ public:
 
 	void reset() noexcept
 	{
-		//SharedPtr<T>().swap(*this);
 		remove_use();
 	}
 
