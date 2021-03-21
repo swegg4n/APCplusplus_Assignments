@@ -23,17 +23,27 @@ public:
 
 	WeakPtr() : _ptr(nullptr), _counter(nullptr) {}
 
-	WeakPtr(const WeakPtr<T>& other) : _ptr(other._ptr), _counter(other._counter) {}
+	WeakPtr(const WeakPtr<T>& other) : _ptr(other._ptr), _counter(other._counter)
+	{
+		if (_counter) _counter->Increment_weak();
+	}
 
-	WeakPtr(const SharedPtr<T>& other) : _ptr(other._ptr), _counter(other._counter) {}
+	WeakPtr(const SharedPtr<T>& other) : _ptr(other._ptr), _counter(other._counter)
+	{
+		if (_counter) _counter->Increment_weak();
+	}
 
-	~WeakPtr() = default;
+	~WeakPtr()
+	{
+		if (_counter) _counter->Decrement_weak();
+	}
 
 
 	WeakPtr<T>& operator=(const SharedPtr<T>& other)
 	{
 		_ptr = other._ptr;
 		_counter = other._counter;
+		if (_counter) _counter->Increment_weak();
 
 		return *this;
 	}

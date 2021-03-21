@@ -55,7 +55,10 @@ public:
 
 	SharedPtr() : _ptr(nullptr), _counter(nullptr) {}
 
-	SharedPtr(T* other) : _ptr(other), _counter(new Counter<T>()) {}
+	SharedPtr(T* other) : _ptr(other), _counter(new Counter<T>())
+	{
+		add_use(_ptr);
+	}
 
 	SharedPtr(const std::nullptr_t) : _ptr(nullptr), _counter(nullptr) {}
 

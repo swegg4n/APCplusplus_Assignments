@@ -13,7 +13,7 @@ private:
 
 public:
 
-	Counter() : _shared_useCount(1), _weak_useCount(1) {}
+	Counter() : _shared_useCount(0), _weak_useCount(0) {}
 
 	~Counter() = default;
 
@@ -44,7 +44,8 @@ public:
 
 	size_t Weak_useCount()
 	{
-		return _weak_useCount;
+		//return _weak_useCount;
+		//return _weak_useCount - ((_shared_useCount > 0) ? 1 : 0);
 	}
 
 };
