@@ -101,7 +101,15 @@ public:
 
 	~SharedPtr()
 	{
-		remove_use();
+		if (_counter != nullptr && _counter->Decrement_shared() == 0)
+		{
+			delete _ptr;
+
+			if (_counter->Weak_useCount() == 0)
+			{
+				delete _counter;
+			}
+		}
 	}
 
 

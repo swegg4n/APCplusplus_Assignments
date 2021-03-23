@@ -25,42 +25,36 @@ public:
 
 	WeakPtr(const WeakPtr<T>& other) : _ptr(other._ptr), _counter(other._counter)
 	{
-		if (_counter) _counter->Increment_weak();
+		if (_counter != nullptr) _counter->Increment_weak();
 	}
 
 	WeakPtr(const SharedPtr<T>& other) : _ptr(other._ptr), _counter(other._counter)
 	{
-		if (_counter) _counter->Increment_weak();
+		if (_counter != nullptr) _counter->Increment_weak();
 	}
 
 	~WeakPtr()
 	{
-		if (_counter) _counter->Decrement_weak();
+		if (_counter != nullptr && _counter->Decrement_weak() == 0)
+		{
+			if (_counter->Shared_useCount() == 0)
+			{
+				delete _counter;
+			}
+		}
 	}
 
 
 	WeakPtr<T>& operator=(const WeakPtr<T>& other)
 	{
-		if (other._counter && _counter)
-			_counter->Increment_weak();
-		else if (_counter)
-			_counter->Decrement_weak();
-
-		_ptr = other._ptr;
-		_counter = other._counter;
+		WeakPtr(other).swap(*this);
 
 		return *this;
 	}
 
 	WeakPtr<T>& operator=(const SharedPtr<T>& other)
 	{
-		if (other._counter && _counter)
-			_counter->Increment_weak();
-		else if (_counter)
-			_counter->Decrement_weak();
-
-		_ptr = other._ptr;
-		_counter = other._counter;
+		WeakPtr(other).swap(*this);
 
 		return *this;
 	}
@@ -71,21 +65,23 @@ public:
 		return expired() ? SharedPtr<T>() : SharedPtr<T>(*this);
 	}
 
-	bool expired() noexcept
+	const bool expired() const noexcept
 	{
 		if (_counter != nullptr)
 		{
-			if (_counter->Shared_useCount() == 0)
+			if (_counter->Shared_useCount() == 0 && _counter->Weak_useCount() == 1)
 			{
-				delete _counter;	//optimization
-				_ptr = nullptr;
-				_counter = nullptr;
+				delete _counter;
+
+				WeakPtr<T>* w_ptr = const_cast<WeakPtr<T>*>(this);
+				w_ptr->_ptr = nullptr;
+				w_ptr->_counter = nullptr;
 
 				return true;
 			}
 			else
 			{
-				return false;
+				return _counter->Shared_useCount() == 0;
 			}
 		}
 		else
@@ -99,7 +95,6 @@ public:
 		std::swap(_ptr, rhs._ptr);
 		std::swap(_counter, rhs._counter);
 	}
-
 
 	bool Invariant()
 	{
